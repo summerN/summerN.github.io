@@ -23,7 +23,8 @@
   
 <script src="/js/pace.min.js"></script>
 
-<meta name="generator" content="Hexo 4.1.1"></head>
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
 
 <body>
 <main class="content">
@@ -65,7 +66,7 @@
       
         
 
-<article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+<article id="post-web狗之xml实体攻击" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
   
   <div class="article-inner">
     
@@ -73,7 +74,7 @@
         
   
     <h2 itemprop="name">
-      <a class="article-title" href="/2019/12/16/hello-world/">Hello World</a>
+      <a class="article-title" href="/2019/12/16/web%E7%8B%97%E4%B9%8Bxml%E5%AE%9E%E4%BD%93%E6%94%BB%E5%87%BB/">web狗之xml实体攻击</a>
     </h2>
   
   
@@ -86,8 +87,8 @@
 
     
       <div class="article-meta">
-        <a href="/2019/12/16/hello-world/" class="article-date">
-  <time datetime="2019-12-16T02:50:33.819Z" itemprop="datePublished">2019-12-16</time>
+        <a href="/2019/12/16/web%E7%8B%97%E4%B9%8Bxml%E5%AE%9E%E4%BD%93%E6%94%BB%E5%87%BB/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.979Z" itemprop="datePublished">2019-12-16</time>
 </a>
         
       </div>
@@ -102,24 +103,607 @@
       
 
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start">Quick Start<a class="post-anchor" href="#Quick-Start"></a></h2><h3 id="Create-a-new-post">Create a new post<a class="post-anchor" href="#Create-a-new-post"></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+        <h2 id="web狗之xml实体攻击浅学"><a href="#web狗之xml实体攻击浅学" class="headerlink" title="web狗之xml实体攻击浅学"></a>web狗之xml实体攻击浅学</h2><p>我们先来了解一下xml</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;note&gt;</span><br><span class="line">&lt;to&gt;chybeta&lt;&#x2F;to&gt;</span><br><span class="line">&lt;from&gt;ph0en1x&lt;&#x2F;from&gt;</span><br><span class="line">&lt;&#x2F;note&gt;</span><br><span class="line">在上面代码中的第一行，定义XML的版本与编码。</span><br><span class="line"></span><br><span class="line">在XML文档中，所有的元素都必须正确的嵌套，形成树形结构。并且整个XML文档中必须要有一个根元素。如上代码，&lt;note&gt;是整个文档的根元素。嵌套在note标签中的&lt;to&gt;和&lt;from&gt;则是根的子元素。</span><br><span class="line"></span><br><span class="line">同时，所有的XML元素都必须有关闭标签，这点不像html语法那样松散。如果缺失关闭标签，则会导致XML解析失败。</span><br></pre></td></tr></table></figure>
+        
+          <a class="article-more-link" href="/2019/12/16/web%E7%8B%97%E4%B9%8Bxml%E5%AE%9E%E4%BD%93%E6%94%BB%E5%87%BB/">Read More...</a>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/web%E7%8B%97%E4%B9%8Bxml%E5%AE%9E%E4%BD%93%E6%94%BB%E5%87%BB/" data-id="ck48f5u95000dz8u33o4vgoah"
+         class="article-share-link">Share</a>
+      
+    </footer>
 
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server">Run server<a class="post-anchor" href="#Run-server"></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+  </div>
 
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files">Generate static files<a class="post-anchor" href="#Generate-static-files"></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+  
 
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites">Deploy to remote sites<a class="post-anchor" href="#Deploy-to-remote-sites"></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+  
 
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+</article>
+
+
+
+      
+        
+
+<article id="post-urldecode二次编码绕过" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/urldecode%E4%BA%8C%E6%AC%A1%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87/">urldecode二次编码绕过</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/urldecode%E4%BA%8C%E6%AC%A1%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.963Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="代码审计日志三urldecode二次绕过"><a href="#代码审计日志三urldecode二次绕过" class="headerlink" title="代码审计日志三urldecode二次绕过"></a>代码审计日志三urldecode二次绕过</h2><p>题目：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">if(eregi(&quot;hackerDJ&quot;,$_GET[id])) &#123;</span><br><span class="line">echo(&quot;</span><br><span class="line"></span><br><span class="line">not allowed!</span><br><span class="line">&quot;);</span><br><span class="line">exit();</span><br><span class="line">&#125;</span><br><span class="line">$_GET[id] &#x3D; urldecode($_GET[id]);</span><br><span class="line">if($_GET[id] &#x3D;&#x3D; &quot;hackerDJ&quot;)</span><br><span class="line">&#123;</span><br><span class="line">echo &quot;</span><br><span class="line"></span><br><span class="line">Access granted!</span><br><span class="line">&quot;;</span><br><span class="line">echo &quot;</span><br><span class="line"></span><br><span class="line">flag</span><br><span class="line">&quot;;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>经过审计：<br>由</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$_GET[id] &#x3D; urldecode($_GET[id]);</span><br></pre></td></tr></table></figure>
+<p>可知，我们需要将hackerDJ进行urldecode编码后get上传<br>我们上传后得到：<br>not allowed!<br>再看url<br>发现我们get传入的url编码值被浏览器自动解码<br>因此我们需要再一次进行编码<br>上传后得到flag</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/12/16/hello-world/" data-id="ck48artr500000gu30t4o15u5"
+      <a data-url="http://yoursite.com/2019/12/16/urldecode%E4%BA%8C%E6%AC%A1%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87/" data-id="ck48f5u94000cz8u3att0h1po"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-sql语句之where字句学习笔记" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/sql%E8%AF%AD%E5%8F%A5%E4%B9%8Bwhere%E5%AD%97%E5%8F%A5%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">sql语句之where字句学习笔记</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/sql%E8%AF%AD%E5%8F%A5%E4%B9%8Bwhere%E5%AD%97%E5%8F%A5%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.948Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="sql语句之where字句学习笔记"><a href="#sql语句之where字句学习笔记" class="headerlink" title="sql语句之where字句学习笔记"></a>sql语句之where字句学习笔记</h2><p>我们先说一下wherer字句作用：</p>
+<pre><code>限制表中的数据返回  符合where后面的条件的数据就会被选中，不符合where条件的语句会被过滤掉</code></pre><p>1.两个极限条件</p>
+<pre><code>where 1 = 1
+where 1 = 2</code></pre><p>自我感觉一般用来完善sql语法补齐引号<br>2.字符串条件的表达<br>就像我们爆表的那个常用语句</p>
+        
+          <a class="article-more-link" href="/2019/12/16/sql%E8%AF%AD%E5%8F%A5%E4%B9%8Bwhere%E5%AD%97%E5%8F%A5%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Read More...</a>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/sql%E8%AF%AD%E5%8F%A5%E4%B9%8Bwhere%E5%AD%97%E5%8F%A5%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-id="ck48f5u93000bz8u3dsosgu73"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-sqli-lab 学习记录less2" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95less2/">sqli-lab 学习记录less2</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95less2/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.932Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <hr>
+<p>title:sqli-lab 学习记录less2<br>date:2019-3-16<br>tags:sqli-lab</p>
+<hr>
+<h2 id="sqli-lab-学习记录less2"><a href="#sqli-lab-学习记录less2" class="headerlink" title="sqli-lab 学习记录less2"></a>sqli-lab 学习记录less2</h2><p>less2<br>1.我们先来判断这次的sql注入类型<br>我们输入</p>
+<pre><code>?id=1
+?id=1&apos;</code></pre><p>发现第一个语句返回正确<br>但是第二个却有了报错<br>我们因此可以判断<br>这次的sql注入类型为数字类型</p>
+        
+          <a class="article-more-link" href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95less2/">Read More...</a>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95less2/" data-id="ck48f5u900007z8u376g54kkg"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-sql注注入类型解释" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/sql%E6%B3%A8%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B%E8%A7%A3%E9%87%8A/">sql注注入类型解释</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/sql%E6%B3%A8%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B%E8%A7%A3%E9%87%8A/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.932Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <hr>
+<p>title: sql注注入类型解释<br>date: 2019-03-16 09:53:41<br>tags:</p>
+<hr>
+<p>sql注入类型简单记录<br>1.sql注入流程<br>（1）判断注入点<br>（2）判断注入类型<br>（3）判断数据库类型<br>（3）获得数据库数据，提权</p>
+        
+          <a class="article-more-link" href="/2019/12/16/sql%E6%B3%A8%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B%E8%A7%A3%E9%87%8A/">Read More...</a>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/sql%E6%B3%A8%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B%E8%A7%A3%E9%87%8A/" data-id="ck48f5u93000az8u378fhacd4"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-sqli-lab 学习记录 less3-less4" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/">sqli-lab 学习记录 less3-less4</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.917Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="sqli-lab-学习记录-less3-less4"><a href="#sqli-lab-学习记录-less3-less4" class="headerlink" title="sqli-lab 学习记录  less3-less4"></a>sqli-lab 学习记录  less3-less4</h2><p>less3:<br>进入界面<br>我们先进行判断注入的类型<br>我们输入</p>
+<pre><code>?id=1</code></pre><p>有正常回显<br>之后我们在输入</p>
+<pre><code>?id=1&apos;</code></pre>
+        
+          <a class="article-more-link" href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/">Read More...</a>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/" data-id="ck48f5u8z0006z8u3g9ng6p7b"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-sqli-lab less1" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/sqli-lab%20less1/">sqli-lab less1</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/sqli-lab%20less1/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.901Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="sqli-lab-学习记录"><a href="#sqli-lab-学习记录" class="headerlink" title="sqli-lab  学习记录"></a>sqli-lab  学习记录</h2><p>Less 1<br>1，我们先要爆出他的字段数，即列的数目<br>插入知识：<br>information_schema数据库是MySQL系统自带的数据库，它提供了数据库元数据的访问方式。<br>感觉information_schema就像是MySQL实例的一个百科全书，记录了数据库当中大部分我们需要了结的信息，比如字符集，权限相关，数据库实体对象信息，外检约束，分区，压缩表，表信息，索引信息，参数，优化，锁和事物等等。<br>数据库拥有一个名为tables的数据表，<br>该表包含两个字段table_name和table_schema,分别记录DBMS中的存储的表名和表名所在的数据库。</p>
+<p>’ or 1=1 –+ （–后要加空格才能注释，但是在网址栏输入时最后加空格解析时会被去掉，所以用+，当然用%20也行）<br>’ or 1=1 # （火狐下在url栏用#注释会报错，改成url编码%23即可）<br>我们使用如下代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1&#39; order by 1 %23</span><br><span class="line">?id&#x3D;1&#39; order by 2 %23</span><br><span class="line">?id&#x3D;1&#39; order by 3 %23</span><br></pre></td></tr></table></figure>
+<p>当我们进行到order by 4 %23时，我们发现报错，所以我们判断有三列<br>对了，要判断注入点<br>输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1&#39;</span><br></pre></td></tr></table></figure>
+
+
+<p>会报错<br>显示<br><img src="https://img-blog.csdnimg.cn/20190314203258751.png" alt="在这里插入图片描述">所以差不多我们输入的就放在了这对引号内<br>ok<br>2.之后我们进行爆表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;0&#39; union select 1,group_concat(table_name),3 from information_schema.tables where table_schema&#x3D;database() %23</span><br></pre></td></tr></table></figure>
+<p>得到了<br><img src="https://img-blog.csdnimg.cn/20190314203625178.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">我们判断用户名在users中<br>之后爆列喽<br>附加一些资料<br><img src="https://img-blog.csdnimg.cn/20190314204021330.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">)<img src="https://img-blog.csdnimg.cn/2019031420403782.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;0&#39; union select 1,group_concat(column_name),3 from information_schema.columns where table_name&#x3D;&#39;users&#39; %23</span><br></pre></td></tr></table></figure>
+<p>得到：<br><img src="https://img-blog.csdnimg.cn/20190314204850959.png" alt="在这里插入图片描述">之后我们再得到我们需要的内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs&#x2F;Less-1&#x2F;?id&#x3D;0&#39; union select 1,group_concat(id,username,password),3 from users %23</span><br></pre></td></tr></table></figure>
+<p>最后我们就得到了我们想要的：<br><img src="https://img-blog.csdnimg.cn/20190314205154204.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">累死了，，，加油吧</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/sqli-lab%20less1/" data-id="ck48f5u920009z8u36bd0e5wt"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-jarvis OJ web babyphp" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/jarvis%20OJ%20web%20babyphp/">jarvis OJ web babyphp</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/jarvis%20OJ%20web%20babyphp/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.885Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="babyphp"><a href="#babyphp" class="headerlink" title="babyphp"></a>babyphp</h2><p>考完二级后我又要回归web狗了<br>今天做到一道web题<br>上题：<br><a href="http://web.jarvisoj.com:32798/" target="_blank" rel="noopener">http://web.jarvisoj.com:32798/</a></p>
+<p>进入后：<br>发现应该有git泄露<br>因此我们使用githack进行获得源码</p>
+        
+          <a class="article-more-link" href="/2019/12/16/jarvis%20OJ%20web%20babyphp/">Read More...</a>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/jarvis%20OJ%20web%20babyphp/" data-id="ck48f5u8x0004z8u360t9daj6"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-python将时间戳转化为时间" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/python%E5%B0%86%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%97%B6%E9%97%B4/">python将时间戳转化为时间</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/python%E5%B0%86%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%97%B6%E9%97%B4/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.885Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <hr>
+<p>title:第一篇博客：python时间转换（将时间戳转化为时间）<br>date: 2019-02-014 22:37:58<br>tags:<br>    python的os.path模块中有着这样的一个函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">os.path.getatime()    #获得文件的最近访问时间</span><br><span class="line">os.path.getctime()    #获得文件的创建时间</span><br><span class="line">os.path.getmtime()   #获得文件的修改时间</span><br></pre></td></tr></table></figure>
+<p>我们就以第一个函数为例<br>os.path.getatime()<br>1.首先使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">time.localtime()     #将其转换为localtime的格式</span><br></pre></td></tr></table></figure>
+<p>2.将转化过来的时间进行格式化，使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">time.strftime(&quot;%d:%b:%Y:%H:%M:%S&quot;,temp)    #temp为转化过来的localtime格式时间</span><br></pre></td></tr></table></figure>
+<p>3.最后输出就行了<br>完整的过程如下所示：`</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">import time</span><br><span class="line">temp &#x3D; time.localtime(os.path.getatime(&quot;python.exe&quot;))</span><br><span class="line">#获取python.exe的最近访问时间，并将其localtime化</span><br><span class="line">temp1 &#x3D; time.strftime(&quot;(&quot;%d:%b:%Y:%H:%M:%S&quot;,temp)</span><br><span class="line">#将temp格式化</span><br><span class="line">print(temp1)</span><br></pre></td></tr></table></figure>
+<p>（这是我第一次写博客，有啥不好的，大佬指教）<br>邮箱：<a href="mailto:497710073@qq.com">497710073@qq.com</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/python%E5%B0%86%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%97%B6%E9%97%B4/" data-id="ck48f5u910008z8u34tuuf2wr"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-issctf     web1" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/issctf%20%20%20%20%20web1/">issctf     web1</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/issctf%20%20%20%20%20web1/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.854Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）"><a href="#标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）" class="headerlink" title="标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）"></a>标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）</h2><p>题目涉及知识点：<br>1.php 中的几个函数（等会列举）<br>2.php parse_str引起的变量覆盖漏洞</p>
+        
+          <a class="article-more-link" href="/2019/12/16/issctf%20%20%20%20%20web1/">Read More...</a>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/issctf%20%20%20%20%20web1/" data-id="ck48f5u8z0005z8u3azrte4ma"
          class="article-share-link">Share</a>
       
     </footer>
@@ -138,6 +722,11 @@
   </article>
   
 
+  
+    <nav class="page-nav">
+      
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next page</a>
+    </nav>
   
 </section>
 </div>

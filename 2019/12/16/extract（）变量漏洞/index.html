@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>
-    Hello World |
+    extract（）变量漏洞 |
     
     summerN&#39;s blog</title>
   
@@ -24,14 +24,15 @@
   
 <script src="/js/pace.min.js"></script>
 
-<meta name="generator" content="Hexo 4.1.1"></head>
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
 
 <body>
 <main class="content">
   <section class="outer">
   
 
-<article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+<article id="post-extract（）变量漏洞" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
   
   <div class="article-inner">
     
@@ -39,7 +40,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Hello World
+      extract（）变量漏洞
     </h1>
   
   
@@ -52,8 +53,8 @@
 
     
       <div class="article-meta">
-        <a href="/2019/12/16/hello-world/" class="article-date">
-  <time datetime="2019-12-16T02:50:33.819Z" itemprop="datePublished">2019-12-16</time>
+        <a href="/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.823Z" itemprop="datePublished">2019-12-16</time>
 </a>
         
       </div>
@@ -76,24 +77,13 @@
       
 
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start">Quick Start<a class="post-anchor" href="#Quick-Start"></a></h2><h3 id="Create-a-new-post">Create a new post<a class="post-anchor" href="#Create-a-new-post"></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server">Run server<a class="post-anchor" href="#Run-server"></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files">Generate static files<a class="post-anchor" href="#Generate-static-files"></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites">Deploy to remote sites<a class="post-anchor" href="#Deploy-to-remote-sites"></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+        <h2 id="php代码审计日志一（bugku-extract变量覆盖）"><a href="#php代码审计日志一（bugku-extract变量覆盖）" class="headerlink" title="php代码审计日志一（bugku  extract变量覆盖）"></a>php代码审计日志一（bugku  extract变量覆盖）</h2><p>题目来源：bugku<br>代码为：<br><img src="https://img-blog.csdnimg.cn/20190309083831775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">我们先了解一下extract（）函数<br><img src="https://img-blog.csdnimg.cn/20190309083932380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">之后我们再了解一下php中的extract（）漏洞</p>
+<p><img src="https://img-blog.csdnimg.cn/2019030908412227.png" alt="在这里插入图片描述"><br>第一次我所构造的为：<br>?shiyan=1&amp;flag=1<br>但是不行<br>我查了一些大佬的wp后发现有：<br><img src="https://img-blog.csdnimg.cn/20190309084444350.png" alt="在这里插入图片描述">之后我们就可以得到flag</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/12/16/hello-world/" data-id="ck48artr500000gu30t4o15u5"
+      <a data-url="http://yoursite.com/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/" data-id="ck48f5u8t0001z8u36sig7y59"
          class="article-share-link">Share</a>
       
     </footer>
@@ -102,11 +92,56 @@
 
   
     
+  <nav class="article-nav">
+    
+      <a href="/2019/12/16/flag.php%20bugku%20%20web/" class="article-nav-link">
+        <strong class="article-nav-caption">Newer posts</strong>
+        <div class="article-nav-title">
+          
+            flag.php bugku  web
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2019/12/16/csdn_export_md/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">csdn_export_md</div>
+      </a>
+    
+  </nav>
+
 
   
 
   
     
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '',
+      clientSecret: '',
+      repo: '',
+      owner: '',
+      admin: [''],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
   
 
 </article>

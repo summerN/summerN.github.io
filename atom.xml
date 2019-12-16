@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>summerN&#39;s blog</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2019-04-05T13:17:59.652Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>summerN</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>web狗之xml实体攻击</title>
+    <link href="http://yoursite.com/2019/12/16/web%E7%8B%97%E4%B9%8Bxml%E5%AE%9E%E4%BD%93%E6%94%BB%E5%87%BB/"/>
+    <id>http://yoursite.com/2019/12/16/web%E7%8B%97%E4%B9%8Bxml%E5%AE%9E%E4%BD%93%E6%94%BB%E5%87%BB/</id>
+    <published>2019-12-16T02:37:33.979Z</published>
+    <updated>2019-04-05T13:17:59.652Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;web狗之xml实体攻击浅学&quot;&gt;&lt;a href=&quot;#web狗之xml实体攻击浅学&quot; class=&quot;headerlink&quot; title=&quot;web狗之xml实体攻击浅学&quot;&gt;&lt;/a&gt;web狗之xml实体攻击浅学&lt;/h2&gt;&lt;p&gt;我们先来了解一下xml&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;?xml version&amp;#x3D;&amp;quot;1.0&amp;quot; encoding&amp;#x3D;&amp;quot;utf-8&amp;quot;?&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;note&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;to&amp;gt;chybeta&amp;lt;&amp;#x2F;to&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;from&amp;gt;ph0en1x&amp;lt;&amp;#x2F;from&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;&amp;#x2F;note&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;在上面代码中的第一行，定义XML的版本与编码。&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;在XML文档中，所有的元素都必须正确的嵌套，形成树形结构。并且整个XML文档中必须要有一个根元素。如上代码，&amp;lt;note&amp;gt;是整个文档的根元素。嵌套在note标签中的&amp;lt;to&amp;gt;和&amp;lt;from&amp;gt;则是根的子元素。&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;同时，所有的XML元素都必须有关闭标签，这点不像html语法那样松散。如果缺失关闭标签，则会导致XML解析失败。&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>urldecode二次编码绕过</title>
+    <link href="http://yoursite.com/2019/12/16/urldecode%E4%BA%8C%E6%AC%A1%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87/"/>
+    <id>http://yoursite.com/2019/12/16/urldecode%E4%BA%8C%E6%AC%A1%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87/</id>
+    <published>2019-12-16T02:37:33.963Z</published>
+    <updated>2019-03-12T11:18:59.768Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;代码审计日志三urldecode二次绕过&quot;&gt;&lt;a href=&quot;#代码审计日志三urldecode二次绕过&quot; class=&quot;headerlink&quot;
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>sql语句之where字句学习笔记</title>
+    <link href="http://yoursite.com/2019/12/16/sql%E8%AF%AD%E5%8F%A5%E4%B9%8Bwhere%E5%AD%97%E5%8F%A5%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    <id>http://yoursite.com/2019/12/16/sql%E8%AF%AD%E5%8F%A5%E4%B9%8Bwhere%E5%AD%97%E5%8F%A5%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</id>
+    <published>2019-12-16T02:37:33.948Z</published>
+    <updated>2019-03-16T07:27:22.813Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;sql语句之where字句学习笔记&quot;&gt;&lt;a href=&quot;#sql语句之where字句学习笔记&quot; class=&quot;headerlink&quot; title=&quot;sql语句之where字句学习笔记&quot;&gt;&lt;/a&gt;sql语句之where字句学习笔记&lt;/h2&gt;&lt;p&gt;我们先说一下wherer字句作用：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;限制表中的数据返回  符合where后面的条件的数据就会被选中，不符合where条件的语句会被过滤掉&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;1.两个极限条件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;where 1 = 1
+where 1 = 2&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;自我感觉一般用来完善sql语法补齐引号&lt;br&gt;2.字符串条件的表达&lt;br&gt;就像我们爆表的那个常用语句&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>sqli-lab 学习记录less2</title>
+    <link href="http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95less2/"/>
+    <id>http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95less2/</id>
+    <published>2019-12-16T02:37:33.932Z</published>
+    <updated>2019-03-16T03:30:33.130Z</updated>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;p&gt;title:sqli-lab 学习记录less2&lt;br&gt;date:2019-3-16&lt;br&gt;tags:sqli-lab&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&quot;sqli-lab-学习记录less2&quot;&gt;&lt;a href=&quot;#sqli-lab-学习记录less2&quot; class=&quot;headerlink&quot; title=&quot;sqli-lab 学习记录less2&quot;&gt;&lt;/a&gt;sqli-lab 学习记录less2&lt;/h2&gt;&lt;p&gt;less2&lt;br&gt;1.我们先来判断这次的sql注入类型&lt;br&gt;我们输入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;?id=1
+?id=1&amp;apos;&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;发现第一个语句返回正确&lt;br&gt;但是第二个却有了报错&lt;br&gt;我们因此可以判断&lt;br&gt;这次的sql注入类型为数字类型&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>sql注注入类型解释</title>
+    <link href="http://yoursite.com/2019/12/16/sql%E6%B3%A8%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B%E8%A7%A3%E9%87%8A/"/>
+    <id>http://yoursite.com/2019/12/16/sql%E6%B3%A8%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B%E8%A7%A3%E9%87%8A/</id>
+    <published>2019-12-16T02:37:33.932Z</published>
+    <updated>2019-03-16T06:45:49.408Z</updated>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;p&gt;title: sql注注入类型解释&lt;br&gt;date: 2019-03-16 09:53:41&lt;br&gt;tags:&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;sql注入类型简单记录&lt;br&gt;1.sql注入流程&lt;br&gt;（1）判断注入点&lt;br&gt;（2）判断注入类型&lt;br&gt;（3）判断数据库类型&lt;br&gt;（3）获得数据库数据，提权&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>sqli-lab 学习记录 less3-less4</title>
+    <link href="http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/"/>
+    <id>http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/</id>
+    <published>2019-12-16T02:37:33.917Z</published>
+    <updated>2019-03-19T12:26:10.716Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;sqli-lab-学习记录-less3-less4&quot;&gt;&lt;a href=&quot;#sqli-lab-学习记录-less3-less4&quot; class=&quot;headerlink&quot; title=&quot;sqli-lab 学习记录  less3-less4&quot;&gt;&lt;/a&gt;sqli-lab 学习记录  less3-less4&lt;/h2&gt;&lt;p&gt;less3:&lt;br&gt;进入界面&lt;br&gt;我们先进行判断注入的类型&lt;br&gt;我们输入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;?id=1&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;有正常回显&lt;br&gt;之后我们在输入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;?id=1&amp;apos;&lt;/code&gt;&lt;/pre&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>sqli-lab less1</title>
+    <link href="http://yoursite.com/2019/12/16/sqli-lab%20less1/"/>
+    <id>http://yoursite.com/2019/12/16/sqli-lab%20less1/</id>
+    <published>2019-12-16T02:37:33.901Z</published>
+    <updated>2019-03-14T12:52:15.039Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;sqli-lab-学习记录&quot;&gt;&lt;a href=&quot;#sqli-lab-学习记录&quot; class=&quot;headerlink&quot; title=&quot;sqli-lab  学习记录&quot;&gt;&lt;/a&gt;sqli-lab  学习记录&lt;/h2&gt;&lt;p&gt;Less
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>jarvis OJ web babyphp</title>
+    <link href="http://yoursite.com/2019/12/16/jarvis%20OJ%20web%20babyphp/"/>
+    <id>http://yoursite.com/2019/12/16/jarvis%20OJ%20web%20babyphp/</id>
+    <published>2019-12-16T02:37:33.885Z</published>
+    <updated>2019-04-02T12:42:20.894Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;babyphp&quot;&gt;&lt;a href=&quot;#babyphp&quot; class=&quot;headerlink&quot; title=&quot;babyphp&quot;&gt;&lt;/a&gt;babyphp&lt;/h2&gt;&lt;p&gt;考完二级后我又要回归web狗了&lt;br&gt;今天做到一道web题&lt;br&gt;上题：&lt;br&gt;&lt;a href=&quot;http://web.jarvisoj.com:32798/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;http://web.jarvisoj.com:32798/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;进入后：&lt;br&gt;发现应该有git泄露&lt;br&gt;因此我们使用githack进行获得源码&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>python将时间戳转化为时间</title>
+    <link href="http://yoursite.com/2019/12/16/python%E5%B0%86%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%97%B6%E9%97%B4/"/>
+    <id>http://yoursite.com/2019/12/16/python%E5%B0%86%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%97%B6%E9%97%B4/</id>
+    <published>2019-12-16T02:37:33.885Z</published>
+    <updated>2019-02-14T15:02:08.780Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;hr&gt;
+&lt;p&gt;title:第一篇博客：python时间转换（将时间戳转化为时间）&lt;br&gt;date: 2019-02-014 22:37:58&lt;br&gt;tags:&lt;br&gt;    python的os.path模块中有着这样的一个函数&lt;/p&gt;
+&lt;figure
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>issctf     web1</title>
+    <link href="http://yoursite.com/2019/12/16/issctf%20%20%20%20%20web1/"/>
+    <id>http://yoursite.com/2019/12/16/issctf%20%20%20%20%20web1/</id>
+    <published>2019-12-16T02:37:33.854Z</published>
+    <updated>2019-05-09T11:09:37.593Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）&quot;&gt;&lt;a href=&quot;#标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）&quot; class=&quot;headerlink&quot; title=&quot;标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）&quot;&gt;&lt;/a&gt;标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）&lt;/h2&gt;&lt;p&gt;题目涉及知识点：&lt;br&gt;1.php 中的几个函数（等会列举）&lt;br&gt;2.php parse_str引起的变量覆盖漏洞&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>flag.php bugku  web</title>
+    <link href="http://yoursite.com/2019/12/16/flag.php%20bugku%20%20web/"/>
+    <id>http://yoursite.com/2019/12/16/flag.php%20bugku%20%20web/</id>
+    <published>2019-12-16T02:37:33.839Z</published>
+    <updated>2019-03-08T11:25:46.123Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;bugku-web-flag-php&quot;&gt;&lt;a href=&quot;#bugku-web-flag-php&quot; class=&quot;headerlink&quot; title=&quot;bugku    web        flag.php&quot;&gt;&lt;/a&gt;&lt;strong&gt;bugku    web 
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>extract（）变量漏洞</title>
+    <link href="http://yoursite.com/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/"/>
+    <id>http://yoursite.com/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/</id>
+    <published>2019-12-16T02:37:33.823Z</published>
+    <updated>2019-03-09T00:45:11.325Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;php代码审计日志一（bugku-extract变量覆盖）&quot;&gt;&lt;a href=&quot;#php代码审计日志一（bugku-extract变量覆盖）&quot; class=&quot;headerlink&quot; title=&quot;php代码审计日志一（bugku 
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>csdn_export_md</title>
+    <link href="http://yoursite.com/2019/12/16/csdn_export_md/"/>
+    <id>http://yoursite.com/2019/12/16/csdn_export_md/</id>
+    <published>2019-12-16T02:37:33.807Z</published>
+    <updated>2019-03-09T23:40:53.875Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;代码审计之strcmp（）漏洞&quot;&gt;&lt;a href=&quot;#代码审计之strcmp（）漏洞&quot; class=&quot;headerlink&quot;
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>bugku成绩单</title>
+    <link href="http://yoursite.com/2019/12/16/bugku%E6%88%90%E7%BB%A9%E5%8D%95/"/>
+    <id>http://yoursite.com/2019/12/16/bugku%E6%88%90%E7%BB%A9%E5%8D%95/</id>
+    <published>2019-12-16T02:37:33.714Z</published>
+    <updated>2019-03-09T08:42:51.179Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;bugku成绩单-详细解析&quot;&gt;&lt;a href=&quot;#bugku成绩单-详细解析&quot; class=&quot;headerlink&quot; title=&quot;bugku成绩单  详细解析&quot;&gt;&lt;/a&gt;bugku成绩单 
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+</feed>

