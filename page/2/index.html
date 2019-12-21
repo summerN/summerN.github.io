@@ -66,6 +66,75 @@
       
         
 
+<article id="post-python将时间戳转化为时间" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/12/16/python%E5%B0%86%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%97%B6%E9%97%B4/">python将时间戳转化为时间</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/16/python%E5%B0%86%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%97%B6%E9%97%B4/" class="article-date">
+  <time datetime="2019-12-16T02:37:33.885Z" itemprop="datePublished">2019-12-16</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <hr>
+<p>title:第一篇博客：python时间转换（将时间戳转化为时间）<br>date: 2019-02-014 22:37:58<br>tags:<br>    python的os.path模块中有着这样的一个函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">os.path.getatime()    #获得文件的最近访问时间</span><br><span class="line">os.path.getctime()    #获得文件的创建时间</span><br><span class="line">os.path.getmtime()   #获得文件的修改时间</span><br></pre></td></tr></table></figure>
+<p>我们就以第一个函数为例<br>os.path.getatime()<br>1.首先使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">time.localtime()     #将其转换为localtime的格式</span><br></pre></td></tr></table></figure>
+<p>2.将转化过来的时间进行格式化，使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">time.strftime(&quot;%d:%b:%Y:%H:%M:%S&quot;,temp)    #temp为转化过来的localtime格式时间</span><br></pre></td></tr></table></figure>
+<p>3.最后输出就行了<br>完整的过程如下所示：`</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">import time</span><br><span class="line">temp &#x3D; time.localtime(os.path.getatime(&quot;python.exe&quot;))</span><br><span class="line">#获取python.exe的最近访问时间，并将其localtime化</span><br><span class="line">temp1 &#x3D; time.strftime(&quot;(&quot;%d:%b:%Y:%H:%M:%S&quot;,temp)</span><br><span class="line">#将temp格式化</span><br><span class="line">print(temp1)</span><br></pre></td></tr></table></figure>
+<p>（这是我第一次写博客，有啥不好的，大佬指教）<br>邮箱：<a href="mailto:497710073@qq.com">497710073@qq.com</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/python%E5%B0%86%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%97%B6%E9%97%B4/" data-id="ck48fez3k000chsu3ekdza07j"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
 <article id="post-issctf     web1" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
   
   <div class="article-inner">
