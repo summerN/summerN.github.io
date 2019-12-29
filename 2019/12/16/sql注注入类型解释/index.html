@@ -62,6 +62,8 @@
 
     
       
+    <div class="tocbot"></div>
+
 
 
 
@@ -75,29 +77,19 @@
       
 
       
-        <hr>
-<p>title: sql注注入类型解释<br>date: 2019-03-16 09:53:41<br>tags:</p>
-<hr>
-<p>sql注入类型简单记录<br>1.sql注入流程<br>（1）判断注入点<br>（2）判断注入类型<br>（3）判断数据库类型<br>（3）获得数据库数据，提权</p>
-<a id="more"></a>
-<p>一、判断注入点</p>
-<p>所有的输入只要和数据库进行交互的，都有可能触发SQL注入<br>一般有三类<br>Get参数触发SQL注入<br>POST参数触发SQL注入<br>Cookie触发SQL注入</p>
-<pre><code>一般我们输入&apos;来判断 是否存在注入点
-如果页面返回错误，则存在 Sql 注入
-原因是：
-原因是无论字符型还是整型都会因为单引号个数不匹配而报错。</code></pre><p>二、判断注入类型<br>我们来了解一下：<br>有以下几种注入类型：<br>（1）数字型注入点<br>（2）字符型注入点<br>（3）搜索型注入点<br>（4）内嵌式sql注入<br>（5）终止试sql注入<br>之后我们进行解释：<br>1.数字型注入点<br>测试方法：</p>
-<pre><code>
-http://host/test.php?id=100 and 1=1 返回成功
+        <h1 id="sql注入类型简单记录"><a href="#sql注入类型简单记录" class="headerlink" title="sql注入类型简单记录"></a>sql注入类型简单记录</h1><a id="more"></a>
 
-http://host/test.php?id=100 and 1=2 返回失败</code></pre><p>为什么呢</p>
+<p>sql注入类型简单记录<br>1.sql注入流程<br>（1）判断注入点<br>（2）判断注入类型<br>（3）判断数据库类型<br>（3）获得数据库数据，提权<br>一、判断注入点</p>
+<p>所有的输入只要和数据库进行交互的，都有可能触发SQL注入<br>一般有三类<br>Get参数触发SQL注入<br>POST参数触发SQL注入<br>Cookie触发SQL注入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">一般我们输入&#39;来判断 是否存在注入点</span><br><span class="line">如果页面返回错误，则存在 Sql 注入</span><br><span class="line">原因是：</span><br><span class="line">原因是无论字符型还是整型都会因为单引号个数不匹配而报错。</span><br></pre></td></tr></table></figure>
+<p>二、判断注入类型<br>我们来了解一下：<br>有以下几种注入类型：<br>（1）数字型注入点<br>（2）字符型注入点<br>（3）搜索型注入点<br>（4）内嵌式sql注入<br>（5）终止试sql注入<br>之后我们进行解释：<br>1.数字型注入点<br>测试方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;host&#x2F;test.php?id&#x3D;100 and 1&#x3D;1 返回成功</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;host&#x2F;test.php?id&#x3D;100 and 1&#x3D;2 返回失败</span><br></pre></td></tr></table></figure>
+
+<p>为什么呢</p>
 <p>假设我们网站的SQL查询的语句是这样的SELECT * FROM news WHERE id=$id<br>那么这个$id 即为用户提交的</p>
 <p>当我们输入的是100 and 1=1<br>语句就变成了这样SELECT * FROM news WHERE id=100 and 1=1<br>对于and</p>
-<pre><code>这个SQL语句and左边是返回成功的，因为我们是在有这个id的情况下后面加上我们的注入语句，如果这个id不存在，那就没法测试了
-
-而在and右边，1=1也是恒成立的，所以整个语句返回的是成功
-
-当然，如果后面改成了1=2的话，因为1=2是不成立的，and语句的判断逻辑是只要有一个不成立，就返回失败，所以1=2最后会返回的是失败
-</code></pre><p>因此我们可以这样进行判断<br>2.字符型注入点<br>测试方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">这个SQL语句and左边是返回成功的，因为我们是在有这个id的情况下后面加上我们的注入语句，如果这个id不存在，那就没法测试了</span><br><span class="line"></span><br><span class="line">而在and右边，1&#x3D;1也是恒成立的，所以整个语句返回的是成功</span><br><span class="line"></span><br><span class="line">当然，如果后面改成了1&#x3D;2的话，因为1&#x3D;2是不成立的，and语句的判断逻辑是只要有一个不成立，就返回失败，所以1&#x3D;2最后会返回的是失败</span><br></pre></td></tr></table></figure>
+<p>因此我们可以这样进行判断<br>2.字符型注入点<br>测试方法：</p>
 <p><a href="http://host/test.php?name=man&#39;" target="_blank" rel="noopener">http://host/test.php?name=man&#39;</a> and ‘1’=’1 返回成功</p>
 <p><a href="http://host/test.php?name=man&#39;" target="_blank" rel="noopener">http://host/test.php?name=man&#39;</a> and ‘1’=’2返回失败</p>
 <p>这里就使上面的数字型变为了字符型</p>

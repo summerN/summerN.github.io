@@ -77,7 +77,9 @@
       
 
       
-        <h2 id="php代码审计日志一（bugku-extract变量覆盖）"><a href="#php代码审计日志一（bugku-extract变量覆盖）" class="headerlink" title="php代码审计日志一（bugku  extract变量覆盖）"></a>php代码审计日志一（bugku  extract变量覆盖）</h2><p>题目来源：bugku<br>代码为：<br><img src="https://img-blog.csdnimg.cn/20190309083831775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">我们先了解一下extract（）函数<br><img src="https://img-blog.csdnimg.cn/20190309083932380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">之后我们再了解一下php中的extract（）漏洞</p>
+        <h2 id="php代码审计日志一（bugku-extract变量覆盖）"><a href="#php代码审计日志一（bugku-extract变量覆盖）" class="headerlink" title="php代码审计日志一（bugku  extract变量覆盖）"></a>php代码审计日志一（bugku  extract变量覆盖）</h2><a id="more"></a>
+
+<p>题目来源：bugku<br>代码为：<br><img src="https://img-blog.csdnimg.cn/20190309083831775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">我们先了解一下extract（）函数<br><img src="https://img-blog.csdnimg.cn/20190309083932380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">之后我们再了解一下php中的extract（）漏洞</p>
 <p><img src="https://img-blog.csdnimg.cn/2019030908412227.png" alt="在这里插入图片描述"><br>第一次我所构造的为：<br>?shiyan=1&amp;flag=1<br>但是不行<br>我查了一些大佬的wp后发现有：<br><img src="https://img-blog.csdnimg.cn/20190309084444350.png" alt="在这里插入图片描述">之后我们就可以得到flag</p>
 
       

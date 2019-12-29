@@ -77,18 +77,23 @@
       
 
       
-        <h2 id="sqli-lab-学习记录-less3-less4"><a href="#sqli-lab-学习记录-less3-less4" class="headerlink" title="sqli-lab 学习记录  less3-less4"></a>sqli-lab 学习记录  less3-less4</h2><p>less3:<br>进入界面<br>我们先进行判断注入的类型<br>我们输入</p>
-<pre><code>?id=1</code></pre><p>有正常回显<br>之后我们在输入</p>
-<pre><code>?id=1&apos;</code></pre><a id="more"></a>
-<p>发现出现了：<br><img src="https://img-blog.csdnimg.cn/20190319192230358.png" alt="在这里插入图片描述">根据后面的报错我们可以大致的判断此sql语句是这样的：</p>
-<pre><code>SELECT * FROM users WHERE id=(&apos;$id&apos;) LIMIT 0,1&quot;</code></pre><p>之后呢，我们来验证我们的判断<br>我们输入</p>
-<pre><code>?id=1&apos;) %23</code></pre><p>得到正常回显<br><img src="https://img-blog.csdnimg.cn/20190319192814704.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>因此我们就确定了注入类型<br>之后的步骤就和我们之前做less1与2一样了<br>这里就不过多解释了</p>
+        <h2 id="sqli-lab-学习记录-less3-less4"><a href="#sqli-lab-学习记录-less3-less4" class="headerlink" title="sqli-lab 学习记录  less3-less4"></a>sqli-lab 学习记录  less3-less4</h2><a id="more"></a>
+
+<p>less3:<br>进入界面<br>我们先进行判断注入的类型<br>我们输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1</span><br></pre></td></tr></table></figure>
+<p>有正常回显<br>之后我们在输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1&#39;</span><br><span class="line"></span><br><span class="line">发现出现了：</span><br><span class="line">![在这里插入图片描述](https:&#x2F;&#x2F;img-blog.csdnimg.cn&#x2F;20190319192230358.png)根据后面的报错我们可以大致的判断此sql语句是这样的：</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM users WHERE id&#x3D;(&#39;$id&#39;) LIMIT 0,1&quot;</span><br></pre></td></tr></table></figure>
+<p>之后呢，我们来验证我们的判断<br>我们输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1&#39;) %23</span><br></pre></td></tr></table></figure>
+<p>得到正常回显<br><img src="https://img-blog.csdnimg.cn/20190319192814704.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>因此我们就确定了注入类型<br>之后的步骤就和我们之前做less1与2一样了<br>这里就不过多解释了</p>
 <p>less4<br>我们还是一样判断注入类型<br>(这个类型与less3相似，但是爆出错误却很难)<br>我刚开始输入了</p>
-<pre><code>?id=1
-?id=1&apos;
-?id=1 and 1=2</code></pre><p>均有回响<br>弄得我一脸懵逼<br>之后尝试使用</p>
-<pre><code>?id=1&quot;</code></pre><p>终于爆出了错误<br><img src="https://img-blog.csdnimg.cn/2019031920140258.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">从错误中我们大致可以判断<br>应该是类似于<br>（“ $id ”）<br>我们可以构造</p>
-<pre><code>?id=1&quot;) %23</code></pre><p>得到正常回显<br>之后我们的步骤和之前一样就可以了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1</span><br><span class="line">?id&#x3D;1&#39;</span><br><span class="line">?id&#x3D;1 and 1&#x3D;2</span><br></pre></td></tr></table></figure>
+<p>均有回响<br>弄得我一脸懵逼<br>之后尝试使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1&quot;</span><br></pre></td></tr></table></figure>
+<p>终于爆出了错误<br><img src="https://img-blog.csdnimg.cn/2019031920140258.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">从错误中我们大致可以判断<br>应该是类似于<br>（“ $id ”）<br>我们可以构造</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1&quot;) %23</span><br></pre></td></tr></table></figure>
+<p>得到正常回显<br>之后我们的步骤和之前一样就可以了</p>
 <p>萌新文章，还请大佬们指导<br>邮箱：<a href="mailto:497710073@qq.com">497710073@qq.com</a></p>
 
       

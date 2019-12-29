@@ -77,7 +77,9 @@
       
 
       
-        <h2 id="bugku成绩单-详细解析"><a href="#bugku成绩单-详细解析" class="headerlink" title="bugku成绩单  详细解析"></a>bugku成绩单  详细解析</h2><p>1，我们首先分别输入1,2,3，<br>均有输出<br>我们输入1’<br>没有回响<br>因此我们可以判断存在sql注入<br>2.我们分别输入</p>
+        <h2 id="bugku成绩单-详细解析"><a href="#bugku成绩单-详细解析" class="headerlink" title="bugku成绩单  详细解析"></a>bugku成绩单  详细解析</h2><a id="more"></a>
+
+<p>1，我们首先分别输入1,2,3，<br>均有输出<br>我们输入1’<br>没有回响<br>因此我们可以判断存在sql注入<br>2.我们分别输入</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1&#39; order by 1#</span><br><span class="line">1&#39; order by 2#</span><br><span class="line">1&#39; order by 3#</span><br><span class="line">1&#39; order by 4#</span><br></pre></td></tr></table></figure>
 <p>均有回响<br>但是当我们使用</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39; order by 5#</span><br></pre></td></tr></table></figure>

@@ -77,7 +77,9 @@
       
 
       
-        <h2 id="sqli-lab-学习记录"><a href="#sqli-lab-学习记录" class="headerlink" title="sqli-lab  学习记录"></a>sqli-lab  学习记录</h2><p>Less 1<br>1，我们先要爆出他的字段数，即列的数目<br>插入知识：<br>information_schema数据库是MySQL系统自带的数据库，它提供了数据库元数据的访问方式。<br>感觉information_schema就像是MySQL实例的一个百科全书，记录了数据库当中大部分我们需要了结的信息，比如字符集，权限相关，数据库实体对象信息，外检约束，分区，压缩表，表信息，索引信息，参数，优化，锁和事物等等。<br>数据库拥有一个名为tables的数据表，<br>该表包含两个字段table_name和table_schema,分别记录DBMS中的存储的表名和表名所在的数据库。</p>
+        <h2 id="sqli-lab-学习记录"><a href="#sqli-lab-学习记录" class="headerlink" title="sqli-lab  学习记录"></a>sqli-lab  学习记录</h2><a id="more"></a>
+
+<p>Less 1<br>1，我们先要爆出他的字段数，即列的数目<br>插入知识：<br>information_schema数据库是MySQL系统自带的数据库，它提供了数据库元数据的访问方式。<br>感觉information_schema就像是MySQL实例的一个百科全书，记录了数据库当中大部分我们需要了结的信息，比如字符集，权限相关，数据库实体对象信息，外检约束，分区，压缩表，表信息，索引信息，参数，优化，锁和事物等等。<br>数据库拥有一个名为tables的数据表，<br>该表包含两个字段table_name和table_schema,分别记录DBMS中的存储的表名和表名所在的数据库。</p>
 <p>’ or 1=1 –+ （–后要加空格才能注释，但是在网址栏输入时最后加空格解析时会被去掉，所以用+，当然用%20也行）<br>’ or 1=1 # （火狐下在url栏用#注释会报错，改成url编码%23即可）<br>我们使用如下代码</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1&#39; order by 1 %23</span><br><span class="line">?id&#x3D;1&#39; order by 2 %23</span><br><span class="line">?id&#x3D;1&#39; order by 3 %23</span><br></pre></td></tr></table></figure>
 <p>当我们进行到order by 4 %23时，我们发现报错，所以我们判断有三列<br>对了，要判断注入点<br>输入</p>

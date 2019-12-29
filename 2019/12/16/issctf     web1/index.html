@@ -77,8 +77,10 @@
       
 
       
-        <h2 id="标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）"><a href="#标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）" class="headerlink" title="标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）"></a>标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）</h2><p>题目涉及知识点：<br>1.php 中的几个函数（等会列举）<br>2.php parse_str引起的变量覆盖漏洞</p>
-<a id="more"></a>
+        <h2 id="标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）"><a href="#标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）" class="headerlink" title="标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）"></a>标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）</h2><a id="more"></a>
+
+<p>题目涉及知识点：<br>1.php 中的几个函数（等会列举）<br>2.php parse_str引起的变量覆盖漏洞</p>
+<!--more-->
 <p>一、<br>我们要了解的php函数即方法<br>$<em>SERVER[‘REQUEST_URI’]<br>parse_url<br>parse_str<br>二、<br>由parse_str引起的变量覆盖漏洞<br>parse_str() 函数用于把查询字符串解析到变量中，如果没有array 参数，则由该函数设置的变量将覆盖已存在的同名变量。<br>ok<br>三、<br>接下来打开题目<br>&lt;?php<br>error_reporting(0);<br>include(“flag.php”); $hashed_key = ‘ddbafb4eb89e218701472d3f6c087fdf7119dfdd560f9d1fcbe7482b0feea05a’; $parsed = parse_url($<em>SERVER[‘REQUEST_URI’]);<br>if(isset($parsed[“query”])){<br>    $query = $parsed[“query”];<br>    $parsed_query = parse_str($query);<br>    if($parsed_query!=NULL){<br>        $action = $parsed_query[‘action’];<br>    }<br>    if($action===”auth”){<br>        $key = $_GET[“key”];<br>        $hashed_input = hash(‘sha256’, $key);<br>        if($hashed_input!==$hashed_key){<br>            die(“<img src='cxk.jpg'>“);<br>        }<br>        echo $flag;<br>    }<br>}else{<br>    show_source(__FILE</em></em>);<br>}?&gt;</p>
 <p>我们只需构造一个get传入<br>是action=auth<br>且将<br>hashed_key变量进行覆盖，传入你想传入的经过sha256后的值<br>最后传入key即可<br>样本<br>?action=auth&amp;hashed_key=xxxxxxx&amp;key=xxx</p>
 

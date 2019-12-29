@@ -77,18 +77,23 @@
       
 
       
-        <h2 id="sql语句之where字句学习笔记"><a href="#sql语句之where字句学习笔记" class="headerlink" title="sql语句之where字句学习笔记"></a>sql语句之where字句学习笔记</h2><p>我们先说一下wherer字句作用：</p>
-<pre><code>限制表中的数据返回  符合where后面的条件的数据就会被选中，不符合where条件的语句会被过滤掉</code></pre><p>1.两个极限条件</p>
-<pre><code>where 1 = 1
-where 1 = 2</code></pre><p>自我感觉一般用来完善sql语法补齐引号<br>2.字符串条件的表达<br>就像我们爆表的那个常用语句</p>
-<a id="more"></a>
+        <h2 id="sql语句之where字句学习笔记"><a href="#sql语句之where字句学习笔记" class="headerlink" title="sql语句之where字句学习笔记"></a>sql语句之where字句学习笔记</h2><a id="more"></a>
 
-<pre><code>?id=0 union select 1,group_concat(table_name),3 from information_schema.tables where table_schema=database()</code></pre><p>先说明一下<br>table_schema 的意思是数据库名<br>database()是返回当前的数据库名<br>因此此处的where意思是指：<br>查询的范围被限定在了此数据库中，即起到约束作用<br>3.模糊查询<br>格式为：<br>like（像）+ 通配符</p>
+<p>我们先说一下wherer字句作用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">限制表中的数据返回  符合where后面的条件的数据就会被选中，不符合where条件的语句会被过滤掉</span><br></pre></td></tr></table></figure>
+<p>1.两个极限条件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">where 1 &#x3D; 1</span><br><span class="line">where 1 &#x3D; 2</span><br></pre></td></tr></table></figure>
+<p>自我感觉一般用来完善sql语法补齐引号<br>2.字符串条件的表达<br>就像我们爆表的那个常用语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;0 union select 1,group_concat(table_name),3 from information_schema.tables where table_schema&#x3D;database()</span><br></pre></td></tr></table></figure>
+<p>先说明一下<br>table_schema 的意思是数据库名<br>database()是返回当前的数据库名<br>因此此处的where意思是指：<br>查询的范围被限定在了此数据库中，即起到约束作用<br>3.模糊查询<br>格式为：<br>like（像）+ 通配符</p>
 <pre><code>（1）    “%”为通配符，代表0 - n个任意字符
 （1）“-”代表一个任意字符</code></pre><p>例如：</p>
-<pre><code>SELECT * FROM news WHERE keyword like &apos;%$keyword%&apos;</code></pre><p>意思就是此查询news中所有的含有我们所输入的$keyword的字符串（暂且先这样说）</p>
-<pre><code>where  name like  ‘_$keyword%’</code></pre><p>这个就是查询中间为我们所输入的字符串<br>@<br>当我们要查询例如’$keyword_’时，我们要进行转义<br>即使用\</p>
-<pre><code>where name like &apos;$keyword\_%&apos;</code></pre><p>4.还有使用一些条件链接符号<br>进行限制条件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM news WHERE keyword like &#39;%$keyword%&#39;</span><br></pre></td></tr></table></figure>
+<p>意思就是此查询news中所有的含有我们所输入的$keyword的字符串（暂且先这样说）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">where  name like  ‘_$keyword%’</span><br></pre></td></tr></table></figure>
+<p>这个就是查询中间为我们所输入的字符串<br>@<br>当我们要查询例如’$keyword_’时，我们要进行转义<br>即使用\</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">where name like &#39;$keyword\_%&#39;</span><br></pre></td></tr></table></figure>
+<p>4.还有使用一些条件链接符号<br>进行限制条件</p>
 
       
     </div>

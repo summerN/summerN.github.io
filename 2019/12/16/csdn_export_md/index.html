@@ -77,7 +77,9 @@
       
 
       
-        <h2 id="代码审计之strcmp（）漏洞"><a href="#代码审计之strcmp（）漏洞" class="headerlink" title="代码审计之strcmp（）漏洞"></a>代码审计之strcmp（）漏洞</h2><p>先了解一下此漏洞：<br><strong>strcmp(str1,str2)比较两个字符串，如果相等就返回0。</strong></p>
+        <h2 id="代码审计之strcmp（）漏洞"><a href="#代码审计之strcmp（）漏洞" class="headerlink" title="代码审计之strcmp（）漏洞"></a>代码审计之strcmp（）漏洞</h2><a id="more"></a>
+
+<p>先了解一下此漏洞：<br><strong>strcmp(str1,str2)比较两个字符串，如果相等就返回0。</strong></p>
 <p>在5.3版本前，如果传入的不是字符串，那么会报错，并且return 0，返回0就代表相等了。<br>绕过strcmp就想办法传入数组吧，只需要v3[]=3即可。</p>
 <p>之后我们通过一个题来做一个例子：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$flag &#x3D; &quot;flag&#123;xxxxx&#125;&quot;;</span><br><span class="line">if (isset($_GET[&#39;a&#39;])) &#123;</span><br><span class="line">if (strcmp($_GET[&#39;a&#39;], $flag) &#x3D;&#x3D; 0) &#x2F;&#x2F;如果 str1 小于 str2 返回 &lt; 0； 如果 str1大于 str2返回 &gt; 0；如果两者相等，返回 0。</span><br><span class="line">&#x2F;&#x2F;比较两个字符串（区分大小写）</span><br><span class="line">die(&#39;Flag: &#39;.$flag);</span><br><span class="line">else</span><br><span class="line">print &#39;No&#39;;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>

