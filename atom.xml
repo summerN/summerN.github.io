@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-12-29T02:29:34.452Z</updated>
+  <updated>2020-01-12T13:30:24.070Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>php伪协议</title>
+    <link href="http://yoursite.com/2020/01/12/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/"/>
+    <id>http://yoursite.com/2020/01/12/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/</id>
+    <published>2020-01-12T13:30:55.096Z</published>
+    <updated>2020-01-12T13:30:24.070Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;php伪协议&quot;&gt;&lt;a href=&quot;#php伪协议&quot; class=&quot;headerlink&quot; title=&quot;php伪协议&quot;&gt;&lt;/a&gt;php伪协议&lt;/h1&gt;&lt;p&gt;看一道题&lt;/p&gt;
+&lt;p&gt;上图&lt;/p&gt;
+&lt;p&gt;&lt;img
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
   
   <entry>
     <title>第四季答题赛 pwn</title>
