@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-01-20T14:24:40.918Z</updated>
+  <updated>2020-01-31T08:46:46.403Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,23 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>堆溢出</title>
+    <link href="http://yoursite.com/2020/01/30/%E5%A0%86%E6%BA%A2%E5%87%BA/"/>
+    <id>http://yoursite.com/2020/01/30/%E5%A0%86%E6%BA%A2%E5%87%BA/</id>
+    <published>2020-01-30T06:01:39.717Z</published>
+    <updated>2020-01-31T08:46:46.403Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;堆溢出略写&quot;&gt;&lt;a href=&quot;#堆溢出略写&quot; class=&quot;headerlink&quot; title=&quot;堆溢出略写&quot;&gt;&lt;/a&gt;堆溢出略写&lt;/h1&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
   
   <entry>
     <title>堆的数据结构</title>
@@ -332,23 +349,6 @@
     <summary type="html">
     
       &lt;h2 id=&quot;bugku-web-flag-php&quot;&gt;&lt;a href=&quot;#bugku-web-flag-php&quot; class=&quot;headerlink&quot; title=&quot;bugku    web        flag.php&quot;&gt;&lt;/a&gt;&lt;strong&gt;bugku    web        flag.php&lt;/strong&gt;&lt;/h2&gt;
-    
-    </summary>
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>extract（）变量漏洞</title>
-    <link href="http://yoursite.com/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/"/>
-    <id>http://yoursite.com/2019/12/16/extract%EF%BC%88%EF%BC%89%E5%8F%98%E9%87%8F%E6%BC%8F%E6%B4%9E/</id>
-    <published>2019-12-16T02:37:33.823Z</published>
-    <updated>2019-12-29T02:30:23.374Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;php代码审计日志一（bugku-extract变量覆盖）&quot;&gt;&lt;a href=&quot;#php代码审计日志一（bugku-extract变量覆盖）&quot; class=&quot;headerlink&quot; title=&quot;php代码审计日志一（bugku  extract变量覆盖）&quot;&gt;&lt;/a&gt;php代码审计日志一（bugku  extract变量覆盖）&lt;/h2&gt;
     
     </summary>
     
