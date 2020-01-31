@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-01-31T08:46:46.403Z</updated>
+  <updated>2020-01-31T13:16:55.567Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,23 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>buuctf</title>
+    <link href="http://yoursite.com/2020/01/31/buuctf/"/>
+    <id>http://yoursite.com/2020/01/31/buuctf/</id>
+    <published>2020-01-31T13:16:38.324Z</published>
+    <updated>2020-01-31T13:16:55.567Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;buuctf-pwn&quot;&gt;&lt;a href=&quot;#buuctf-pwn&quot; class=&quot;headerlink&quot; title=&quot;buuctf pwn&quot;&gt;&lt;/a&gt;buuctf pwn&lt;/h1&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
   
   <entry>
     <title>堆溢出</title>
@@ -332,23 +349,6 @@
     <summary type="html">
     
       &lt;h2 id=&quot;标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）&quot;&gt;&lt;a href=&quot;#标题issctf-中最简单的一个web题（耗费了我一个小时。。。。）&quot; class=&quot;headerlink&quot; title=&quot;标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）&quot;&gt;&lt;/a&gt;标题issctf 中最简单的一个web题（耗费了我一个小时。。。。）&lt;/h2&gt;
-    
-    </summary>
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>flag.php bugku  web</title>
-    <link href="http://yoursite.com/2019/12/16/flag.php%20bugku%20%20web/"/>
-    <id>http://yoursite.com/2019/12/16/flag.php%20bugku%20%20web/</id>
-    <published>2019-12-16T02:37:33.839Z</published>
-    <updated>2019-12-29T02:30:26.206Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;bugku-web-flag-php&quot;&gt;&lt;a href=&quot;#bugku-web-flag-php&quot; class=&quot;headerlink&quot; title=&quot;bugku    web        flag.php&quot;&gt;&lt;/a&gt;&lt;strong&gt;bugku    web        flag.php&lt;/strong&gt;&lt;/h2&gt;
     
     </summary>
     
