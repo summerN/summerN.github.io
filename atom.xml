@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-02-01T09:38:51.574Z</updated>
+  <updated>2020-02-01T09:48:34.597Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -17,15 +17,15 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>内存修改</title>
-    <link href="http://yoursite.com/2020/02/01/%E5%86%85%E5%AD%98%E4%BF%AE%E6%94%B9/"/>
-    <id>http://yoursite.com/2020/02/01/%E5%86%85%E5%AD%98%E4%BF%AE%E6%94%B9/</id>
-    <published>2020-02-01T09:38:40.703Z</published>
-    <updated>2020-02-01T09:38:51.574Z</updated>
+    <title>buuctf</title>
+    <link href="http://yoursite.com/2020/01/31/buuctf/"/>
+    <id>http://yoursite.com/2020/01/31/buuctf/</id>
+    <published>2020-01-31T13:16:38.324Z</published>
+    <updated>2020-02-01T09:48:34.597Z</updated>
     
     <summary type="html">
     
-      &lt;h1 id=&quot;内存修改&quot;&gt;&lt;a href=&quot;#内存修改&quot; class=&quot;headerlink&quot; title=&quot;内存修改&quot;&gt;&lt;/a&gt;内存修改&lt;/h1&gt;
+      &lt;h1 id=&quot;buuctf-pwn&quot;&gt;&lt;a href=&quot;#buuctf-pwn&quot; class=&quot;headerlink&quot; title=&quot;buuctf pwn&quot;&gt;&lt;/a&gt;buuctf pwn&lt;/h1&gt;
     
     </summary>
     
