@@ -77,7 +77,9 @@
       
 
       
-        <h1 id="Fastbin-attack"><a href="#Fastbin-attack" class="headerlink" title="Fastbin attack"></a>Fastbin attack</h1><p>1、fastbin chunk 结构<br>未分配的chunk<br>|         |  size  ｜<br>|  fd  ｜         ｜<br>已分配chunk<br>｜       ｜   size  ｜<br>｜    content     ｜<br>        ……<br>malloc返回的指针指向content位置</p>
+        <h1 id="Fastbin-attack"><a href="#Fastbin-attack" class="headerlink" title="Fastbin attack"></a>Fastbin attack</h1><a id="more"></a>
+
+<p>1、fastbin chunk 结构<br>未分配的chunk<br>|         |  size  ｜<br>|  fd  ｜         ｜<br>已分配chunk<br>｜       ｜   size  ｜<br>｜    content     ｜<br>        ……<br>malloc返回的指针指向content位置</p>
 <h2 id="1-Fastbin-double-free"><a href="#1-Fastbin-double-free" class="headerlink" title="1.Fastbin double free"></a>1.Fastbin double free</h2><p>注意这里：malloc返回的指针指向content位置</p>
 <p>content包含 fd bk 与data</p>
 <p>Fastbin Double Free 是指 fastbin 的 chunk 可以被多次释放，因此可以在 fastbin  链表中存在多次。这样导致的后果是多次分配可以从 fastbin  链表中取出同一个堆块，相当于多个指针指向同一个堆块，结合堆块的数据内容可以实现类似于类型混淆(type confused)的效果。</p>

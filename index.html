@@ -103,33 +103,10 @@
       
 
       
-        <h1 id="Fastbin-attack"><a href="#Fastbin-attack" class="headerlink" title="Fastbin attack"></a>Fastbin attack</h1><p>1、fastbin chunk 结构<br>未分配的chunk<br>|         |  size  ｜<br>|  fd  ｜         ｜<br>已分配chunk<br>｜       ｜   size  ｜<br>｜    content     ｜<br>        ……<br>malloc返回的指针指向content位置</p>
-<h2 id="1-Fastbin-double-free"><a href="#1-Fastbin-double-free" class="headerlink" title="1.Fastbin double free"></a>1.Fastbin double free</h2><p>注意这里：malloc返回的指针指向content位置</p>
-<p>content包含 fd bk 与data</p>
-<p>Fastbin Double Free 是指 fastbin 的 chunk 可以被多次释放，因此可以在 fastbin  链表中存在多次。这样导致的后果是多次分配可以从 fastbin  链表中取出同一个堆块，相当于多个指针指向同一个堆块，结合堆块的数据内容可以实现类似于类型混淆(type confused)的效果。</p>
-<p>Fastbin Double Free 能够成功利用主要有两部分的原因</p>
-<ol>
-<li>fastbin 的堆块被释放后 next_chunk 的 pre_inuse 位不会被清空</li>
-<li>fastbin 在执行 free 的时候仅验证了 main_arena 直接指向的块，即链表指针头部的块。对于链表后面的块，并没有进行验证。</li>
-</ol>
-<p>图解：</p>
-<p>如果我们在 chunk1 释放后，再释放 chunk2 ，这样 main_arena 就指向 chunk2 而不是 chunk1 了，此时我们再去释放 chunk1 就不再会被检测到。 </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">int main(void)</span><br><span class="line">&#123;</span><br><span class="line">    void *chunk1,*chunk2,*chunk3;</span><br><span class="line">    chunk1&#x3D;malloc(0x10);</span><br><span class="line">    chunk2&#x3D;malloc(0x10);</span><br><span class="line"></span><br><span class="line">    free(chunk1);</span><br><span class="line">    free(chunk2);</span><br><span class="line">    free(chunk1);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p> 第一次释放<code>free(chunk1)</code></p>
-<p><img src="https://wiki.x10sec.org/pwn/heap/figure/fastbin_free_chunk1.png" alt="img"></p>
-<p>第二次释放<code>free(chunk2)</code></p>
-<p><img src="https://wiki.x10sec.org/pwn/heap/figure/fastbin_free_chunk2.png" alt="img"></p>
-<p>第三次释放<code>free(chunk1)</code></p>
-<p><img src="https://wiki.x10sec.org/pwn/heap/figure/fastbin_free_chunk3.png" alt="img"></p>
-<p><strong>例子：</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">void</span> *chunk1,*chunk2,*chunk3;</span><br><span class="line">    <span class="keyword">void</span> *chunk_a,*chunk_b;</span><br><span class="line"></span><br><span class="line">```</span><br><span class="line">bss_chunk.<span class="built_in">size</span>=<span class="number">0x21</span>;</span><br><span class="line">chunk1=<span class="built_in">malloc</span>(<span class="number">0x10</span>);	</span><br><span class="line">chunk2=<span class="built_in">malloc</span>(<span class="number">0x10</span>);	<span class="comment">//a</span></span><br><span class="line">```</span><br><span class="line"></span><br><span class="line">```</span><br><span class="line"><span class="built_in">free</span>(chunk1);</span><br><span class="line"><span class="built_in">free</span>(chunk2);</span><br><span class="line"><span class="built_in">free</span>(chunk1);		<span class="comment">//b</span></span><br><span class="line">```</span><br><span class="line"></span><br><span class="line">```</span><br><span class="line">chunk_a=<span class="built_in">malloc</span>(<span class="number">0x10</span>);	<span class="comment">//c</span></span><br><span class="line">*(<span class="keyword">long</span> <span class="keyword">long</span> *)chunk_a=&amp;bss_chunk;	<span class="comment">//d</span></span><br><span class="line"><span class="built_in">malloc</span>(<span class="number">0x10</span>);</span><br><span class="line"><span class="built_in">malloc</span>(<span class="number">0x10</span>);</span><br><span class="line">chunk_b=<span class="built_in">malloc</span>(<span class="number">0x10</span>);		<span class="comment">//e</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%p"</span>,chunk_b);</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">```</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>a 此句执行完后，chunk1,chunk2会在连续的区域内，在内存里的表现<br>｜chunk1||chunk2|<br>low addr—–&gt;high addr</p>
-<p>b 如果直接连续free(chunk1),会被libc检查出double free(检查方式为free时看放入链表的指针与链表现在的指针是否同一个。如fastbin-&gt;a,free(a)则检查出double free。如果fastbin-&gt;b-&gt;a。free(a)则bypass)<br>此时fastbin链表为：<br>main_arena.fastbin—&gt;chunk1—&gt;chunk2—&gt;chunk1（注意chunk1的fd也是指向chunk2,即chunk1和chunk2是一个环形链表）<br>在内存中表现如下：<br>chunk1_addr:    ｜        0        ｜    0x11    ｜<br>            ｜    chunk2_addr    ｜            ｜<br>chunk2_addr:    ｜        0        ｜    0x11    ｜<br>            ｜    chunk1_addr    ｜            ｜</p>
-<p>c 分配时从fastbin的首部取出，即chunk_a获得的是chunk1的地址<br>d 修改chunk_a即修改chunk1的fd位置，把此处修改为全局变量bss_chunk的地址<br>此时fastbin链表为fastbin—&gt;chunk2—&gt;chunk1—&gt;bss_chunk</p>
-<p>e 经过3次malloc(0x11)，依次从fastbin中取出，此次取出的地址就是我们写入的地址</p>
-
+        <h1 id="Fastbin-attack"><a href="#Fastbin-attack" class="headerlink" title="Fastbin attack"></a>Fastbin attack</h1>
+        
+          <a class="article-more-link" href="/2020/02/02/Fastbin%20attack/">Read More...</a>
+        
       
     </div>
     <footer class="article-footer">
