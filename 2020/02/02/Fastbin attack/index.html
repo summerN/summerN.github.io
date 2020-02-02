@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    Fastbin attack |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-Fastbin attack" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Fastbin attack
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/02/02/Fastbin%20attack/" class="article-date">
+  <time datetime="2020-02-02T10:12:43.179Z" itemprop="datePublished">2020-02-02</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="Fastbin-attack"><a href="#Fastbin-attack" class="headerlink" title="Fastbin attack"></a>Fastbin attack</h1><p>1、fastbin chunk 结构<br>未分配的chunk<br>|         |  size  ｜<br>|  fd  ｜         ｜<br>已分配chunk<br>｜       ｜   size  ｜<br>｜    content     ｜<br>        ……<br>malloc返回的指针指向content位置</p>
+<h2 id="1-Fastbin-double-free"><a href="#1-Fastbin-double-free" class="headerlink" title="1.Fastbin double free"></a>1.Fastbin double free</h2><p>注意这里：malloc返回的指针指向content位置</p>
+<p>content包含 fd bk 与data</p>
+<p>Fastbin Double Free 是指 fastbin 的 chunk 可以被多次释放，因此可以在 fastbin  链表中存在多次。这样导致的后果是多次分配可以从 fastbin  链表中取出同一个堆块，相当于多个指针指向同一个堆块，结合堆块的数据内容可以实现类似于类型混淆(type confused)的效果。</p>
+<p>Fastbin Double Free 能够成功利用主要有两部分的原因</p>
+<ol>
+<li>fastbin 的堆块被释放后 next_chunk 的 pre_inuse 位不会被清空</li>
+<li>fastbin 在执行 free 的时候仅验证了 main_arena 直接指向的块，即链表指针头部的块。对于链表后面的块，并没有进行验证。</li>
+</ol>
+<p>图解：</p>
+<p>如果我们在 chunk1 释放后，再释放 chunk2 ，这样 main_arena 就指向 chunk2 而不是 chunk1 了，此时我们再去释放 chunk1 就不再会被检测到。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">int main(void)</span><br><span class="line">&#123;</span><br><span class="line">    void *chunk1,*chunk2,*chunk3;</span><br><span class="line">    chunk1&#x3D;malloc(0x10);</span><br><span class="line">    chunk2&#x3D;malloc(0x10);</span><br><span class="line"></span><br><span class="line">    free(chunk1);</span><br><span class="line">    free(chunk2);</span><br><span class="line">    free(chunk1);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 第一次释放<code>free(chunk1)</code></p>
+<p><img src="https://wiki.x10sec.org/pwn/heap/figure/fastbin_free_chunk1.png" alt="img"></p>
+<p>第二次释放<code>free(chunk2)</code></p>
+<p><img src="https://wiki.x10sec.org/pwn/heap/figure/fastbin_free_chunk2.png" alt="img"></p>
+<p>第三次释放<code>free(chunk1)</code></p>
+<p><img src="https://wiki.x10sec.org/pwn/heap/figure/fastbin_free_chunk3.png" alt="img"></p>
+<p><strong>例子：</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">void</span> *chunk1,*chunk2,*chunk3;</span><br><span class="line">    <span class="keyword">void</span> *chunk_a,*chunk_b;</span><br><span class="line"></span><br><span class="line">```</span><br><span class="line">bss_chunk.<span class="built_in">size</span>=<span class="number">0x21</span>;</span><br><span class="line">chunk1=<span class="built_in">malloc</span>(<span class="number">0x10</span>);	</span><br><span class="line">chunk2=<span class="built_in">malloc</span>(<span class="number">0x10</span>);	<span class="comment">//a</span></span><br><span class="line">```</span><br><span class="line"></span><br><span class="line">```</span><br><span class="line"><span class="built_in">free</span>(chunk1);</span><br><span class="line"><span class="built_in">free</span>(chunk2);</span><br><span class="line"><span class="built_in">free</span>(chunk1);		<span class="comment">//b</span></span><br><span class="line">```</span><br><span class="line"></span><br><span class="line">```</span><br><span class="line">chunk_a=<span class="built_in">malloc</span>(<span class="number">0x10</span>);	<span class="comment">//c</span></span><br><span class="line">*(<span class="keyword">long</span> <span class="keyword">long</span> *)chunk_a=&amp;bss_chunk;	<span class="comment">//d</span></span><br><span class="line"><span class="built_in">malloc</span>(<span class="number">0x10</span>);</span><br><span class="line"><span class="built_in">malloc</span>(<span class="number">0x10</span>);</span><br><span class="line">chunk_b=<span class="built_in">malloc</span>(<span class="number">0x10</span>);		<span class="comment">//e</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%p"</span>,chunk_b);</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">```</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>a 此句执行完后，chunk1,chunk2会在连续的区域内，在内存里的表现<br>｜chunk1||chunk2|<br>low addr—–&gt;high addr</p>
+<p>b 如果直接连续free(chunk1),会被libc检查出double free(检查方式为free时看放入链表的指针与链表现在的指针是否同一个。如fastbin-&gt;a,free(a)则检查出double free。如果fastbin-&gt;b-&gt;a。free(a)则bypass)<br>此时fastbin链表为：<br>main_arena.fastbin—&gt;chunk1—&gt;chunk2—&gt;chunk1（注意chunk1的fd也是指向chunk2,即chunk1和chunk2是一个环形链表）<br>在内存中表现如下：<br>chunk1_addr:    ｜        0        ｜    0x11    ｜<br>            ｜    chunk2_addr    ｜            ｜<br>chunk2_addr:    ｜        0        ｜    0x11    ｜<br>            ｜    chunk1_addr    ｜            ｜</p>
+<p>c 分配时从fastbin的首部取出，即chunk_a获得的是chunk1的地址<br>d 修改chunk_a即修改chunk1的fd位置，把此处修改为全局变量bss_chunk的地址<br>此时fastbin链表为fastbin—&gt;chunk2—&gt;chunk1—&gt;bss_chunk</p>
+<p>e 经过3次malloc(0x11)，依次从fastbin中取出，此次取出的地址就是我们写入的地址</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/02/Fastbin%20attack/" data-id="ck653o9ep0000ooluh8zrh6gz"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2020/02/01/%E5%86%85%E5%AD%98%E4%BF%AE%E6%94%B9/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">内存修改</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '665e1db541e975225bc6',
+      clientSecret: '525f3534fe6005375cf8c02330ed09a2b7aab7d5',
+      repo: 'talk',
+      owner: 'summerN',
+      admin: ['summerN'],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2020 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
