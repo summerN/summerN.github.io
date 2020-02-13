@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-02-07T15:32:41.957Z</updated>
+  <updated>2020-02-13T07:26:01.734Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>buuctf pwn</title>
+    <link href="http://yoursite.com/2020/02/13/buuctf/"/>
+    <id>http://yoursite.com/2020/02/13/buuctf/</id>
+    <published>2020-02-12T16:00:00.000Z</published>
+    <updated>2020-02-13T07:26:01.734Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+
+&lt;h3 id=&quot;1&quot;&gt;&lt;a href=&quot;#1&quot; class=&quot;headerlink&quot; title=&quot;1&quot;&gt;&lt;/a&gt;1&lt;/h3&gt;&lt;p&gt;nc 出结果&lt;/p&gt;
+&lt;h3 id=&quot;2&quot;&gt;&lt;a href=&quot;#2&quot; class=&quot;headerlink&quot;
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
   
   <entry>
     <title>fastbin-attack 2014 hack.lu oreo </title>
@@ -315,23 +341,6 @@
     <summary type="html">
     
       &lt;h2 id=&quot;sql语句之where字句学习笔记&quot;&gt;&lt;a href=&quot;#sql语句之where字句学习笔记&quot; class=&quot;headerlink&quot; title=&quot;sql语句之where字句学习笔记&quot;&gt;&lt;/a&gt;sql语句之where字句学习笔记&lt;/h2&gt;
-    
-    </summary>
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>sqli-lab 学习记录less2</title>
-    <link href="http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95less2/"/>
-    <id>http://yoursite.com/2019/12/16/sqli-lab%20%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95less2/</id>
-    <published>2019-12-16T02:37:33.932Z</published>
-    <updated>2019-12-29T02:31:56.348Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;sqli-lab-学习记录less2&quot;&gt;&lt;a href=&quot;#sqli-lab-学习记录less2&quot; class=&quot;headerlink&quot; title=&quot;sqli-lab 学习记录less2&quot;&gt;&lt;/a&gt;sqli-lab 学习记录less2&lt;/h1&gt;
     
     </summary>
     
