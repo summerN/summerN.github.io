@@ -3,7 +3,9 @@
   <entry>
     <title>2020高校战疫pwn</title>
     <url>/2020/03/11/2020%E9%AB%98%E6%A0%A1%E6%88%98%E7%96%ABpwn/</url>
-    <content><![CDATA[<h1 id="2020高校战疫pwn"><a href="#2020高校战疫pwn" class="headerlink" title="2020高校战疫pwn"></a>2020高校战疫pwn</h1><h2 id="easyheap"><a href="#easyheap" class="headerlink" title="easyheap"></a>easyheap</h2><p>1.此题目功能为：edit add free三个功能</p>
+    <content><![CDATA[<h1 id="2020高校战疫pwn"><a href="#2020高校战疫pwn" class="headerlink" title="2020高校战疫pwn"></a>2020高校战疫pwn</h1><h2 id="easyheap"><a href="#easyheap" class="headerlink" title="easyheap"></a>easyheap</h2><a id="more"></a>
+
+<p>1.此题目功能为：edit add free三个功能</p>
 <p>2.保护状态，没有开启PIE保护，可以挟持got表内容</p>
 <p>3.堆溢出状态：在free后第二次建立的chunk（即第三个chunk）内的地址指向堆的初始位置，可以通过edit功能实现堆溢出</p>
 <h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>1.通过堆溢出将free函数的got表内容覆盖为puts函数的plt地址，在执行free功能时即可执行put函数，同时，在之后的参数位置覆盖为puts的got表地址，泄露libc基地址</p>
